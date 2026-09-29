@@ -41,7 +41,7 @@ enum PaneLead {
         waitToReconnect?(view, ZmxLeadBook.shared.role(pane: pane) != nil || ZmxLeadBook.shared.reattaching(pane: pane))
     }
 
-    /// True when `event` belongs to a takeover and must not reach the terminal.
+    /// True when `event` belongs to a takeover or a pane waiting to reconnect, and must not reach the terminal.
     static func consumes(_ event: NSEvent, in view: GhosttySurfaceView) -> Bool {
         // the takeover key's release can land on the destroyed old view, or on nothing while the new one
         // mounts, and never reach this. A fresh press of the same key proves it was released.

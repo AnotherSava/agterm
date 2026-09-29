@@ -54,7 +54,7 @@ public final class RemoteReconnectBook {
     public private(set) var entries: [UUID: Entry] = [:]
     private var resumed: [UUID: (at: Date, failures: Int)] = [:]
 
-    public init() {}
+    init() {}
 
     public var isEmpty: Bool { entries.isEmpty }
 
