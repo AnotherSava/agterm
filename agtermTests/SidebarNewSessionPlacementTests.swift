@@ -3,7 +3,6 @@ import XCTest
 @testable import agterm
 import agtermCore
 
-/// The workspace row's New Session under "After the current session", in the sidebar's own store.
 @MainActor
 final class SidebarNewSessionPlacementTests: XCTestCase {
     private var stateDir: URL!
@@ -73,8 +72,6 @@ final class SidebarNewSessionPlacementTests: XCTestCase {
         XCTAssertEqual(sessions.last?.id, store.selectedSessionID)
     }
 
-    // MARK: - Helpers
-
     private func invokeNewSession(onWorkspaceRowFor workspaceID: UUID) throws {
         let row = try XCTUnwrap((0..<outline.numberOfRows).first { row in
             (outline.item(atRow: row) as? SidebarNode).map { $0.kind == .workspace && $0.id == workspaceID } ?? false
@@ -102,7 +99,7 @@ final class SidebarNewSessionPlacementTests: XCTestCase {
         scroll.documentView = outline
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 240, height: 400),
                           styleMask: [.titled], backing: .buffered, defer: false)
-        window.isReleasedWhenClosed = false // see SidebarStatusBlinkTests for why
+        window.isReleasedWhenClosed = false
         window.contentView = scroll
 
         coordinator.outlineView = outline

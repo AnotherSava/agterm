@@ -134,7 +134,7 @@ final class AppActions {
         return settingsModel?.settings.resolveNewSessionCwd(currentSessionCwd: current, home: home) ?? home
     }
 
-    /// The `addSession(at:)` slot under the placement setting, in `store`'s own tree; nil appends.
+    /// resolvedNewSessionIndex applies the placement setting to the supplied store's tree; nil appends.
     func resolvedNewSessionIndex(in workspaceID: UUID, store: AppStore) -> Int? {
         store.newSessionInsertionIndex(inWorkspace: workspaceID,
                                        placement: settingsModel?.settings.effectiveNewSessionPlacement ?? .end)

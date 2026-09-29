@@ -119,7 +119,7 @@ public struct AppSettings: Codable, Equatable, Sendable {
         case custom
     }
 
-    /// Where a new session lands in its workspace. `end` is the default and the nil case.
+    /// NewSessionPlacement controls workspace insertion; an unset setting defaults to `end`.
     public enum NewSessionPlacement: String, CaseIterable, Sendable {
         case end
         case afterCurrent
@@ -295,7 +295,7 @@ public struct AppSettings: Codable, Equatable, Sendable {
     public var newSessionDirectory: String?
     /// The fixed directory used when `newSessionDirectory` is `custom`; nil/empty falls back to home.
     public var newSessionCustomDirectory: String?
-    /// Where a new session lands, a `NewSessionPlacement` raw value; nil = `end`.
+    /// newSessionPlacement stores a `NewSessionPlacement` raw value; nil means `end`.
     public var newSessionPlacement: String?
     /// Whether a GUI session close (⌘W, the File/palette Close Session, the sidebar row's Close) confirms
     /// first; nil = off. Read on demand; the control channel's `session.close` never prompts.

@@ -286,7 +286,8 @@ extension WorkspaceSidebar.Coordinator {
         openDirectoryAndAddSession(toWorkspace: node.id)
     }
 
-    /// The row's New Session and "+": the directory and placement settings apply, as for `AppActions.newSession()`.
+    /// addNewSession shares the directory and placement settings of `AppActions.newSession()`
+    /// with the workspace row's New Session and "+".
     private func addNewSession(toWorkspace workspaceID: UUID) {
         addSession(toWorkspace: workspaceID, cwd: actions.resolvedNewSessionCwd(),
                    at: actions.resolvedNewSessionIndex(in: workspaceID, store: store))
