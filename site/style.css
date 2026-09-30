@@ -347,6 +347,9 @@ a {
 }
 .surfaces-grid .surfaces-wide {
   grid-column: span 3;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 36px;
+  padding: 36px;
 }
 @media (max-width: 980px) {
   .surfaces-grid {
@@ -358,9 +361,12 @@ a {
 }
 @media (max-width: 620px) {
   .surfaces-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .surfaces-grid .surfaces-wide {
     grid-column: span 1;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+    padding: 26px;
   }
 }
