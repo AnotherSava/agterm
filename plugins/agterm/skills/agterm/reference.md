@@ -1410,12 +1410,14 @@ parse diagnostics (0 = clean). App-global (no `--window`).
 - `actions[]` — every rebindable built-in: `action` (its `keymap.conf` name), `chord` (the resolved menu
   chord in the same kitty syntax the file uses, omitted when the action is keyless or a `map` line left it
   with no menu chord), `alternates[]` (its other binds, the ones a key monitor delivers, omitted when it
-  has none), and `overridden: true` when a `map` line moved it off its shipped default. Every action is
+  has none), `repeats: true` only when its `--repeat` line kept a leader sequence among those alternatives,
+  and `overridden: true` when a `map` line moved it off its shipped default. Every action is
   listed, bound or not, so you can also see which chords are free.
 - `commands[]` — the custom commands: `name`, and `shortcut` omitted for a palette-only one. A shortcut
-  holding alternatives is one `|`-joined string, in the file's own spelling. `errorHud` is always a boolean,
-  `errorPosition` is the canonical position (default `center`), and `errorPane` is `left` or `right`,
-  omitted for session-wide placement. The human listing shows error options for opted-in commands.
+  holding alternatives is one `|`-joined string, in the file's own spelling. `repeats` (true only when a
+  `--repeat` shortcut kept a leader sequence) and `errorHud` are
+  always booleans, `errorPosition` is the canonical position (default `center`), and `errorPane` is `left` or `right`,
+  omitted for session-wide placement. The human listing shows `--repeat` and error options for opted-in commands.
 - `diagnostics[]` — `line` + `message` per parse problem (`keymap.reload` returns only the count).
 - `menu[]` — the key equivalents the menu bar carries: `chord`, the owning `menu`, the item `title`, its
   `selector`, and `enabled: false` when the item is disabled. agterm's own items report `menuAction:`;
@@ -1446,11 +1448,16 @@ line can express — such an item is AppKit's own and never matches an action.
 The file lives at `<config dir>/keymap.conf` (default `~/.config/agterm`; the dir is set in Settings ▸
 Key Mapping). Three verbs, line-based; blank lines and `#` comments ignored:
 
-- `map <chord> <action>` — rebind a built-in menu action.
-- `command "<name>" [chord] [error options] <shell...>` — define a custom shell command, listed in the action palette
+- `map <chord> [--repeat] <action>` — rebind a built-in menu action.
+- `command "<name>" [chord] [--repeat] [error options] <shell...>` — define a custom shell command, listed in the action palette
   marked `custom`. The quoted name may contain spaces. The post-name token is the chord only if it
   parses and starts with a modifier or a function key (`f1` through `f20`).
   A custom chord may be a leader sequence (chords joined by `>`, e.g. `ctrl+a>g`). No chord → palette-only.
+- `--repeat` (either verb, after the chord) is tmux's `bind -r`: after a leader sequence fires, its prefix
+  stays live until 0.5 s after the tail is released, so the last chord of any `--repeat` sequence sharing that prefix fires again alone
+  (`ctrl+a>ctrl+l ctrl+l`); holding the tail autorepeats it. Any other key ends the window and is matched
+  afresh. A tail without a modifier (`ctrl+a>n`) takes that letter when typed within the window. Only a
+  leader sequence can repeat: `keymap list` reports `repeats` true only when one survived.
 - `global-hotkey <chord>` — bind ONE system-wide chord that summons the quick terminal while any
   application is frontmost. Unset unless the line is present. Exactly one chord: no alternatives, no
   leader sequence, and it needs a modifier unless it is a function key.

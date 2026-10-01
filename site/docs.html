@@ -1670,6 +1670,19 @@
               siblings keep firing. If a line ends up binding nothing at all, the action simply keeps the shortcut it shipped with.
             </p>
             <p style="font-size: 15px; line-height: 1.65; color: #949ba4; margin: 16px 0 0">
+              A leader sequence fires once and forgets its prefix. Add
+              <span style="font-family: &quot;JetBrains Mono&quot;, monospace; color: #cbc6bc">--repeat</span> after the chord, on either
+              verb, to keep the prefix live until half a second after you release the key, like tmux's
+              <span style="font-family: &quot;JetBrains Mono&quot;, monospace; color: #cbc6bc">bind -r</span>:
+              with <span style="font-family: &quot;JetBrains Mono&quot;, monospace; color: #cbc6bc">map cmd+opt+up|ctrl+a&gt;ctrl+h --repeat previous_session</span>
+              and <span style="font-family: &quot;JetBrains Mono&quot;, monospace; color: #cbc6bc">map cmd+opt+down|ctrl+a&gt;ctrl+l --repeat next_session</span>,
+              <span style="font-family: &quot;JetBrains Mono&quot;, monospace; color: #cbc6bc">⌃A ⌃L ⌃L ⌃H</span> walks two sessions down and one back,
+              the shipped ⌘⌥↑/⌘⌥↓ still working, and holding the tail repeats it. Any other key ends the window and reaches the terminal
+              as usual; only a leader sequence repeats. A tail without a modifier, like
+              <span style="font-family: &quot;JetBrains Mono&quot;, monospace; color: #cbc6bc">ctrl+a&gt;n</span>, takes that letter when you type it
+              within half a second of releasing the previous one.
+            </p>
+            <p style="font-size: 15px; line-height: 1.65; color: #949ba4; margin: 16px 0 0">
               Chords are written in Latin and keep working on a non-Latin keyboard layout. A layout that cannot type ASCII —
               Russian, Greek, Hebrew, Arabic, Thai — resolves every chord by the physical key position, so
               <span style="font-family: &quot;JetBrains Mono&quot;, monospace; color: #cbc6bc">cmd+o</span> still fires on the key

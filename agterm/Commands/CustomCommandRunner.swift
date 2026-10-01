@@ -76,10 +76,16 @@ final class CustomCommandRunner {
     private var leaderTimer: Timer?
     private var keymapObserver: NSObjectProtocol?
     private var menuActionObserver: NSObjectProtocol?
+    private var resignActiveObserver: NSObjectProtocol?
     private var consumedKeyCodes: Set<UInt16> = []
+    /// The fired `--repeat` tail still held down. Its window does not time out until release: macOS sends the
+    /// first autorepeat only after "Delay until repeat" (0.5 s by default, often longer).
+    private var heldRepeatKeyCode: UInt16?
 
     /// How long a half-typed leader sequence waits for its next chord before abandoning (kitty-style).
     private static let leaderTimeout: TimeInterval = 1.5
+    /// How long a `--repeat` sequence's prefix stays live after its tail is released; tmux's `repeat-time`.
+    private static let repeatTimeout: TimeInterval = 0.5
 
     /// How long a failure panel stays up: long enough to read a line, short enough that a message about a
     /// command that has already finished is not still sitting over the session minutes later.
@@ -117,6 +123,18 @@ final class CustomCommandRunner {
         ) { [weak self] _ in
             MainActor.assumeIsolated { self?.recordMenuKeyPress(NSApp.currentEvent) }
         }
+        // a keyUp outside the app never arrives, so a held tail must not keep its window open past deactivation.
+        resignActiveObserver = NotificationCenter.default.addObserver(
+            forName: NSApplication.didResignActiveNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.applicationDidResignActive() }
+        }
+    }
+
+    /// Close an open repeat window and forget the held tail; a half-typed leader keeps its own timeout.
+    func applicationDidResignActive() {
+        heldRepeatKeyCode = nil
+        if commandEngine.isRepeating { resetMatcher() }
     }
 
     /// Remove the key monitor, observers, and pending leader timer.
@@ -127,7 +145,9 @@ final class CustomCommandRunner {
         keymapObserver = nil
         if let menuActionObserver { NotificationCenter.default.removeObserver(menuActionObserver) }
         menuActionObserver = nil
-        cancelLeaderTimer()
+        if let resignActiveObserver { NotificationCenter.default.removeObserver(resignActiveObserver) }
+        resignActiveObserver = nil
+        resetMatcher()
         consumedKeyCodes.removeAll()
     }
 
@@ -137,8 +157,9 @@ final class CustomCommandRunner {
     /// the matcher.
     private func rebuild() {
         let keymap = settings.keymap
-        commandEngine = CustomCommandEngine(commands: keymap.commands, builtinSequences: keymap.builtinSequences)
-        cancelLeaderTimer()
+        commandEngine = CustomCommandEngine(commands: keymap.commands, builtinSequences: keymap.builtinSequences,
+                                            builtinRepeating: keymap.builtinRepeating)
+        resetMatcher()
     }
 
     /// The Esc virtual keycode the matcher treats specially (the leader abort); Return is bindable and goes
@@ -154,19 +175,27 @@ final class CustomCommandRunner {
 
     /// Feed one key event to the matcher; returns whether it was consumed (so the caller drops it). Esc while
     /// armed resets, `.fired` runs a command, `.firedBuiltin` runs a built-in action, `.armed` arms the leader
-    /// timer, and `toggle_fullscreen`'s chord toggles full screen without reaching the matcher at all — all
-    /// consumed; `.unmatched` passes through.
+    /// timer, and `toggle_fullscreen`'s chord toggles full screen when nothing else claims it — all consumed;
+    /// `.unmatched` passes through.
     ///
     /// Acts when the key window's first responder is a terminal surface (context from that surface), or when
     /// the key window is an agterm terminal window whose focus is NOT on a text field — including one emptied
     /// to zero sessions. Passes through for a focused text field (Settings editor, inline rename, palette
     /// search) so a bound chord never eats those keystrokes, and for an auxiliary window focused off a text
-    /// field. Repeats and releases of consumed presses stay consumed without firing again.
+    /// field. Repeats and releases of consumed presses stay consumed without firing again, except autorepeat
+    /// of a live `--repeat` tail, which fires like a fresh press.
     func handleKeyEvent(_ event: NSEvent, in keyWindow: NSWindow?) -> Bool {
         // ownership lasts through release, even if the action changes focus or a leader times out.
-        if event.type == .keyUp { return consumedKeyCodes.remove(event.keyCode) != nil }
+        if event.type == .keyUp {
+            releaseRepeatTail(event.keyCode)
+            return consumedKeyCodes.remove(event.keyCode) != nil
+        }
         guard event.type == .keyDown else { return false }
-        if event.isARepeat { return consumedKeyCodes.contains(event.keyCode) }
+        if event.isARepeat {
+            guard consumedKeyCodes.contains(event.keyCode) else { return false }
+            if let keyWindow, isLiveRepeatTail(event) { _ = handleKeyDown(event, in: keyWindow) }
+            return true
+        }
         // a release may have occurred outside the app; a fresh press starts new ownership for this key.
         consumedKeyCodes.remove(event.keyCode)
         guard let keyWindow else { return false }
@@ -177,58 +206,38 @@ final class CustomCommandRunner {
 
     /// Dispatch a fresh press in a supplied window, also used by hosted tests whose window never becomes key.
     func handleKeyDown(_ event: NSEvent, in keyWindow: NSWindow) -> Bool {
-        guard !event.isARepeat else { return false }
+        guard !event.isARepeat || isLiveRepeatTail(event) else { return false }
         let responder = keyWindow.firstResponder
         // a focused text field is the window's NSText field editor and must keep its keystrokes: drop the
-        // half-typed leader, pass through.
+        // half-typed leader or open repeat window, pass through.
         if responder is NSText {
-            if commandEngine.isArmed {
-                commandEngine.reset()
-                cancelLeaderTimer()
-            }
+            if commandEngine.isArmed || commandEngine.isRepeating { resetMatcher() }
             return false
         }
         let focusedSurface = responder as? GhosttySurfaceView
         // with no focused surface, fire ONLY from an agterm terminal window (empty qualifies), never Settings.
         guard focusedSurface != nil || WindowRegistry.shared.contains(keyWindow) else {
-            if commandEngine.isArmed {
-                commandEngine.reset()
-                cancelLeaderTimer()
-            }
+            if commandEngine.isArmed || commandEngine.isRepeating { resetMatcher() }
             return false
         }
         // esc abandons a half-typed leader (the call the timeout makes) and is not bindable, so it comes
         // before the chord.
         if event.keyCode == Self.escapeKeyCode {
-            guard commandEngine.isArmed else { return false }
-            commandEngine.reset()
-            cancelLeaderTimer()
-            return true
+            // an open repeat window closes, but Esc still reaches the terminal: only a half-typed leader eats it.
+            let wasArmed = commandEngine.isArmed
+            resetMatcher()
+            return wasArmed
         }
         guard let chord = chord(from: event) else {
             // a key with no usable base (e.g. a bare modifier) can't advance; while armed, keep waiting.
             return false
         }
-        // `toggle_fullscreen` is the one built-in with no menu item to carry its equivalent: AppKit appends
-        // the only full screen item there is, at menu-display time, and an item of agterm's own beside it is
-        // the duplicate this avoids. So the rebindable chord is matched here instead. A half-typed leader
-        // sequence still wins, exactly as it does over a custom command sharing its first chord.
-        // Its MENU chord alone comes through here, ungated; an alternative of the same `map` line goes the
-        // ordinary `.firedBuiltin` route and so takes that route's modal rule.
-        if !commandEngine.isArmed, chord == settings.keymap.equivalent(for: .toggleFullscreen) {
-            keyWindow.toggleFullScreen(nil)
-            return true
-        }
-        // a focused page receives key equivalents before the menu, and one cancelling the keydown makes WebKit
-        // report it handled, so close_session's menu chord never reaches Close Session. Taken here while a
-        // page holds focus; the chord's other owners keep the menu path.
-        if !commandEngine.isArmed, Self.pageHoldsFocus(responder), chord == settings.keymap.equivalent(for: .closeSession) {
-            actions.perform(.closeSession, in: keyWindow)
-            return true
-        }
+        // a repeat tail equal to the full screen or close session chord must repeat, so the chord goes to the
+        // matcher first.
+        let wasArmed = commandEngine.isArmed
         switch commandEngine.advance(chord) {
         case .fired(let command):
-            cancelLeaderTimer()
+            holdRepeatWindowOrCancel(for: event.keyCode)
             if let focusedSurface {
                 // context from the surface that had focus at key-down, not the frontmost active session.
                 runFromKeybind(command, focusedSurface: focusedSurface)
@@ -238,7 +247,7 @@ final class CustomCommandRunner {
             }
             return true
         case .firedBuiltin(let action):
-            cancelLeaderTimer()
+            holdRepeatWindowOrCancel(for: event.keyCode)
             // no focusedSurface/runNoSurface split: a built-in acts on the active session and key window,
             // like the palette row behind it. Consumed even when `perform` finds the action gated out: the
             // gate lives inside each action, so this cannot see the outcome, and passing a leader's LAST chord
@@ -250,6 +259,24 @@ final class CustomCommandRunner {
             return true
         case .unmatched:
             cancelLeaderTimer()
+            // `toggle_fullscreen` is the one built-in with no menu item to carry its equivalent: AppKit appends
+            // the only full screen item there is, at menu-display time, and an item of agterm's own beside it
+            // is the duplicate this avoids. So the rebindable chord is matched here instead, and a half-typed
+            // leader sequence still wins, exactly as it does over a custom command sharing its first chord.
+            // Its MENU chord alone comes through here, ungated; an alternative of the same `map` line goes the
+            // ordinary `.firedBuiltin` route and so takes that route's modal rule.
+            guard !wasArmed else { return false }
+            if chord == settings.keymap.equivalent(for: .toggleFullscreen) {
+                keyWindow.toggleFullScreen(nil)
+                return true
+            }
+            // a focused page receives key equivalents before the menu, and one cancelling the keydown makes WebKit
+            // report it handled, so close_session's menu chord never reaches Close Session. Taken here while a
+            // page holds focus; the chord's other owners keep the menu path.
+            if Self.pageHoldsFocus(responder), chord == settings.keymap.equivalent(for: .closeSession) {
+                actions.perform(.closeSession, in: keyWindow)
+                return true
+            }
             return false
         }
     }
@@ -261,6 +288,10 @@ final class CustomCommandRunner {
             view = current.superview
         }
         return false
+    }
+
+    private func isLiveRepeatTail(_ event: NSEvent) -> Bool {
+        commandEngine.isRepeating && chord(from: event).map(commandEngine.isRepeatTail) == true
     }
 
     /// Map an `NSEvent` key-down to an agtermCore `Chord`, or nil when it carries no usable base key. The base
@@ -288,9 +319,9 @@ final class CustomCommandRunner {
         return Chord(mods: mods, key: key)
     }
 
-    private func startLeaderTimer() {
+    private func startLeaderTimer(_ interval: TimeInterval = CustomCommandRunner.leaderTimeout) {
         cancelLeaderTimer()
-        leaderTimer = Timer.scheduledTimer(withTimeInterval: Self.leaderTimeout, repeats: false) { [weak self] _ in
+        leaderTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { [weak self] _ in
             MainActor.assumeIsolated {
                 guard let self else { return }
                 self.commandEngine.reset()
@@ -302,6 +333,26 @@ final class CustomCommandRunner {
     private func cancelLeaderTimer() {
         leaderTimer?.invalidate()
         leaderTimer = nil
+    }
+
+    private func resetMatcher() {
+        commandEngine.reset()
+        cancelLeaderTimer()
+        heldRepeatKeyCode = nil
+    }
+
+    /// After a fire, an open repeat window waits for the tail's release instead of timing out.
+    private func holdRepeatWindowOrCancel(for keyCode: UInt16) {
+        cancelLeaderTimer()
+        heldRepeatKeyCode = commandEngine.isRepeating ? keyCode : nil
+    }
+
+    /// Releasing the held tail starts the repeat timeout, unless a key pressed meanwhile already closed the
+    /// window (a new leader keeps its own, longer timeout).
+    private func releaseRepeatTail(_ keyCode: UInt16) {
+        guard keyCode == heldRepeatKeyCode else { return }
+        heldRepeatKeyCode = nil
+        if commandEngine.isRepeating { startLeaderTimer(Self.repeatTimeout) }
     }
 
     /// Run a command fired from the PALETTE: context from the active session (the palette has no first
