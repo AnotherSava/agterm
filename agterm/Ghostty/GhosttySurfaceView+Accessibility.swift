@@ -314,4 +314,24 @@ extension GhosttySurfaceView {
         }
         return super.isAccessibilitySelectorAllowed(selector)
     }
+
+    /// Watch the transitions that move `window?.isVisible`, the `axExposed` term nothing else reports.
+    /// `deckVisible` is pure MODEL state, so miniaturizing the window — or hiding the app — leaves this pane
+    /// `deckVisible == true` while AppKit reports `isVisible == false`. Without these, `axExposed` went
+    /// true → false → true across a minimize/restore with no `.layoutChanged` posted at all.
+    /// `object: nil` like the key observers: the post recomputes from THIS view's own window, so another
+    /// window's notification costs one latch compare. Tokens join `focusObservers`, so teardown is unchanged.
+    func observeWindowVisibilityChanges() {
+        let center = NotificationCenter.default
+        let names: [Notification.Name] = [
+            NSWindow.didMiniaturizeNotification, NSWindow.didDeminiaturizeNotification,
+            NSApplication.didHideNotification, NSApplication.didUnhideNotification,
+        ]
+        for name in names {
+            let token = center.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
+                MainActor.assumeIsolated { self?.postAccessibilityExposureChange() }
+            }
+            focusObservers.append(token)
+        }
+    }
 }

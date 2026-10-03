@@ -38,6 +38,13 @@ paths:
   the inset panel leaves panes on screen. A detached quick/scratch/split host is hidden regardless of its
   last deck value, and the ordered-out quick panel clears `deckOnScreen` itself since `orderOut` keeps
   `window` set.
+- A window that is miniaturized, ordered out or hidden with the app keeps its views attached, so
+  `showsOnScreen` also requires `window.isVisible`. The view observes that key on its current window
+  (`observeWindowVisibility`, re-armed in `viewDidMoveToWindow`): ordering has no notification of its
+  own, and occlusion notifications can miss an order-in. Whole-window occlusion and other Spaces are
+  deliberately not terms: a covered window keeps its swap chains. Since occlusion is terminal
+  visibility, a program using mode 2033 gets a report when its window is hidden this way and when it
+  returns.
 - Occlusion is TERMINAL visibility, not a renderer lever: every edge flips `terminal.flags.visible` and,
   under mode 2033, emits a visibility report, so never toggle it to force a GPU re-release for a pane
   that stayed hidden. The release is edge-triggered while the CA display callback draws unguarded, so a
