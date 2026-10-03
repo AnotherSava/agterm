@@ -867,7 +867,7 @@ final class ControlServer {
                 }
             },
             app: identity,
-            liveReset: liveResetReadback(),
+            liveReset: liveResetReadback(), indexUnsaved: library.indexUnsaved,
             // the mirror the sidebars render from, so the read-back names what is on screen.
             flaggedLayout: GhosttyApp.shared.flaggedViewLayout,
             htmlZoom: HtmlOverlayRegistry.shared.zoom

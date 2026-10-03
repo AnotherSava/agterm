@@ -127,7 +127,9 @@ public final class AppStore {
     @ObservationIgnored var pendingCloseOrder: [UUID] = []
     @ObservationIgnored var pendingCloseTasks: [UUID: Task<Void, Never>] = [:]
 
-    @ObservationIgnored private let persistence: PersistenceStore
+    @ObservationIgnored let persistence: PersistenceStore
+    /// snapshotDidSave runs after each snapshot write that landed.
+    @ObservationIgnored let snapshotDidSave: (() -> Void)?
     @ObservationIgnored let recentClosedStore: RecentClosedStore?
     @ObservationIgnored var recentClosedDidChange: (() -> Void)?
     @ObservationIgnored let controlEventSink: ((ControlEventDraft) -> Void)?
@@ -146,10 +148,10 @@ public final class AppStore {
     @ObservationIgnored let launchPaneDrop: (([UUID]) -> Void)?
     /// Coalesces the high-frequency selection/font saves: a click-storm or a font ramp writes once after the
     /// burst settles instead of hitting disk per event.
-    @ObservationIgnored private let saveDebouncer = Debouncer()
+    @ObservationIgnored let saveDebouncer = Debouncer()
 
     /// The quiet window before a scheduled (selection/font) save writes to disk.
-    private static let saveDebounceInterval: TimeInterval = 0.3
+    static let saveDebounceInterval: TimeInterval = 0.3
 
     /// Idle timeout after which the window auto-jumps its selection to the oldest blocked session, nil when
     /// auto-follow is off (the default). Set by the Settings fan-out; read imperatively by `noteUserActivity`
@@ -186,6 +188,7 @@ public final class AppStore {
                 persistence: PersistenceStore = PersistenceStore(),
                 recentClosedStore: RecentClosedStore? = nil,
                 recentClosedDidChange: (() -> Void)? = nil,
+                snapshotDidSave: (() -> Void)? = nil,
                 controlEventSink: ((ControlEventDraft) -> Void)? = nil,
                 paneFinalizer: (([UUID]) -> Void)?,
                 launchPaneDrop: (([UUID]) -> Void)? = nil) {
@@ -194,6 +197,7 @@ public final class AppStore {
         self.persistence = persistence
         self.recentClosedStore = recentClosedStore
         self.recentClosedDidChange = recentClosedDidChange
+        self.snapshotDidSave = snapshotDidSave
         self.controlEventSink = controlEventSink
         self.paneFinalizer = paneFinalizer
         self.launchPaneDrop = launchPaneDrop
@@ -287,7 +291,7 @@ public final class AppStore {
                             dashboardHighlighted: () -> String? = { nil },
                             dashboardFontSize: () -> Double? = { nil },
                             dashboardFontMode: () -> String? = { nil }, app: AppIdentity? = nil,
-                            liveReset: ControlLiveResetReadback? = nil,
+                            liveReset: ControlLiveResetReadback? = nil, indexUnsaved: Bool = false,
                             flaggedLayout: FlaggedViewLayout? = nil, htmlZoom: Double? = nil) -> ControlTree {
         let activeID = selectedSessionID
         // `currentWorkspaceID`, not the selected session's owner: an EMPTY destination selects nothing, so
@@ -309,6 +313,7 @@ public final class AppStore {
                 let surfaces = TerminalZoomSurface.allCases.compactMap { surface -> ControlSurfaceNode? in
                     guard surface.isAvailable(in: session) else { return nil }
                     let id = TerminalSurfaceID(sessionID: session.id, surface: surface).rawValue
+                    let pane = session.paneIdentity(for: surface)
                     return ControlSurfaceNode(id: id, kind: surface.rawValue, active: surface.isActive(in: session),
                                               visible: surface.isVisible(in: session),
                                               backedByZmx: session.zmxBacking(for: surface),
@@ -380,7 +385,8 @@ public final class AppStore {
                            dashboardHighlighted: dashboardHighlighted(),
                            dashboardFontSize: dashboardFontSize(),
                            dashboardFontMode: dashboardFontMode(),
-                           pickPending: pickPending(), askPending: askPending(), app: app, liveReset: liveReset)
+                           pickPending: pickPending(), askPending: askPending(), app: app, liveReset: liveReset,
+                           indexUnsaved: indexUnsaved ? true : nil)
     }
 
     /// The tree's `paneOverlays`: the panes covered by their own overlay, omitted when neither is.
@@ -914,44 +920,7 @@ public final class AppStore {
         reselectIfSelectionHidden()
     }
 
-    /// Persists the current state eagerly, after every structural mutation and on terminate. Cancels any
-    /// pending debounced save first, so a `save()` (incl. the quit-flush) writes the latest snapshot and no
-    /// stale write fires afterward. A failure is logged and swallowed — a disk error must not kill the model.
-    public func save() {
-        saveChecked()
-    }
-
-    /// `save()` that REPORTS whether the write landed, for a caller whose acknowledgement must not outrun the
-    /// disk. `setRestoreCommand` is the one today: a "cleared" ack that never reached disk would leave the
-    /// old shell line armed on every launch. `save()` is this with the result discarded, so they can't drift.
-    @discardableResult
-    func saveChecked() -> Bool {
-        saveDebouncer.cancel()
-        do {
-            try persistence.save(snapshot())
-            return true
-        } catch {
-            log("save failed: \(error)")
-            return false
-        }
-    }
-
-    /// Debounces a `save()`, coalescing the rapid selection/font writes; used only by
-    /// `selectSession`/`setFontSize`, while structural mutations call `save()` immediately.
-    private func scheduleSave() {
-        saveDebouncer.schedule(after: AppStore.saveDebounceInterval) { [weak self] in
-            self?.save()
-        }
-    }
-
-    /// Drops any pending debounced save WITHOUT writing, unlike `save()`, which cancels then writes. Used when
-    /// the owning window is being deleted (`WindowLibrary.removeWindow`): a save scheduled just before the
-    /// delete must be dropped, else it fires afterward and re-creates the per-window file as an orphan.
-    public func cancelPendingSave() {
-        saveDebouncer.cancel()
-    }
-
-    private func log(_ message: @autoclosure () -> String) {
+    func log(_ message: @autoclosure () -> String) {
         NSLog("agterm: %@", message())
     }
 

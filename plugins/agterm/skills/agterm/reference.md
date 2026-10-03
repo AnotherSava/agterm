@@ -300,7 +300,9 @@ window, omitted when none is pending), `askPending` (the pending GUI question's 
 and `app` (which agterm is serving this socket: `version`, plus
 `commit` when the build recorded one — the same value `agtermctl version` returns, so an agent already
 reading the tree gets its version floor without a second round-trip; it is not duplicated onto
-`window.list`, where a caller uses `version` instead). `idleMs` is live
+`window.list`, where a caller uses `version` instead), and `indexUnsaved` (true while the last write of
+the window index failed, omitted otherwise; app-wide, and it clears on the next index write that lands).
+`idleMs` is live
 and grows while the window is idle, so it is on `tree` only, never `window.list`; `sidebarVisible` is on
 both; `sidebarMode`, `sidebarWidth`, `workspaceFilter`, `quickVisible`, `zoomedSurface`, the four
 `dashboard*` fields, `pickPending`, and `askPending`

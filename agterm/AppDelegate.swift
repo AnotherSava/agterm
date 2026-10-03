@@ -405,8 +405,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             Self.exitFlush(pending: liveReset?.armablePending, steps: ExitFlushSteps(
                 capture: { _ = self.captureOnExit?(library.allOpenSessions()) },
                 finalize: { library.finalizeAllPendingCloses() },
-                saveChecked: { library.saveAllOpenChecked() },
-                save: { library.saveAllOpen() },
+                saveChecked: { library.saveAllChecked() },
+                save: { library.saveAllChecked() },
                 arm: { selection in
                     guard let store = self.liveResetMarkerStore else { return false }
                     return Self.armLiveReset(selection, store: store) {
@@ -415,7 +415,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                     }
                 }))
         }
-        library?.saveIndex()
         // flush pending debounced settings writes (a keyboard-driven opacity/blur change holds a ~0.3s save
         // no drag-end commit fires) so they survive ⌘Q.
         settingsModel?.flushPendingSaves()
@@ -429,9 +428,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let arm: (LiveReset.Selection) -> Bool
     }
 
-    /// The exit flush in its fixed order: capture, finalize pending closes, then save. A pending Live
-    /// sessions reset takes the CHECKED save and arms only when it reports every snapshot written; capture
-    /// is invoked, not judged, since its count is best effort. Returns whether a reset was armed.
+    /// exitFlush runs in a fixed order: capture, finalize pending closes, then save. A pending Live
+    /// sessions reset takes the CHECKED save and arms only when it reports every snapshot and the index
+    /// written; capture is invoked, not judged, since its count is best effort. Returns whether a reset
+    /// was armed.
     @discardableResult
     static func exitFlush(pending: LiveReset.Selection?, steps: ExitFlushSteps) -> Bool {
         steps.capture()
@@ -441,7 +441,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return false
         }
         guard steps.saveChecked() else {
-            logger.error("live sessions reset not armed: a window snapshot did not save")
+            logger.error("live sessions reset not armed: window state or the index did not save")
             return false
         }
         return steps.arm(pending)

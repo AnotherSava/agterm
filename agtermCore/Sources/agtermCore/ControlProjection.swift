@@ -629,6 +629,9 @@ public struct ControlTree: Codable, Sendable, Equatable {
     /// The Live sessions reset state: app-global like `app`, omitted when nothing is pending and no launch
     /// has consumed a marker. The read side of `zmx.reset`.
     public let liveReset: ControlLiveResetReadback?
+    /// indexUnsaved is true while the last `windows.json` write failed, omitted otherwise. App-global like
+    /// `app`.
+    public let indexUnsaved: Bool?
 
     public init(workspaces: [ControlWorkspaceNode], idleMs: Int? = nil, autoFollowMs: Int? = nil,
                 sidebarVisible: Bool? = nil, sidebarMode: String? = nil, sidebarFlaggedLayout: String? = nil,
@@ -637,9 +640,11 @@ public struct ControlTree: Codable, Sendable, Equatable {
                 zoomedSurface: String? = nil, dashboardMembers: [String]? = nil,
                 dashboardHighlighted: String? = nil, dashboardFontSize: Double? = nil,
                 dashboardFontMode: String? = nil, pickPending: String? = nil, askPending: String? = nil,
-                app: AppIdentity? = nil, liveReset: ControlLiveResetReadback? = nil) {
+                app: AppIdentity? = nil, liveReset: ControlLiveResetReadback? = nil,
+                indexUnsaved: Bool? = nil) {
         self.workspaces = workspaces
         self.liveReset = liveReset
+        self.indexUnsaved = indexUnsaved
         self.idleMs = idleMs
         self.autoFollowMs = autoFollowMs
         self.sidebarVisible = sidebarVisible

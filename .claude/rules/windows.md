@@ -43,6 +43,12 @@ session drag are out of scope.
 - State lives under `AGTERM_STATE_DIR` or Application Support: `windows.json` plus
   `windows/<uuid>.json`. Legacy `workspaces.json` remains dormant after migration. `PersistenceStore.fileName`
   defaults to `workspaces.json`; index and window mutations save only their own files.
+- A failed `windows.json` write sets `WindowLibrary.indexUnsaved`, which the tree reports and which
+  clears only on an index write that lands. While it stands, each snapshot save that lands retries the
+  index (`AppStore.snapshotDidSave`), and the exit flush writes it through `saveAllChecked`, ahead of
+  arming a Live reset. It does not recover a crash with no later write: a valid index that names no
+  entry for a window still short-circuits bootstrap past the orphan scan, which stays index-loss only
+  because scanning after a clean load can resurrect a window whose snapshot removal failed.
 - Bootstrap never throws. Load a valid index; otherwise recover every UUID-named per-window file before
   considering legacy migration or an empty seed. Recovered files are appended before `loadStore`, named
   `window N`, all opened, and the first made frontmost. Missing/corrupt window snapshots open with a
