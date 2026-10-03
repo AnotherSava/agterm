@@ -45,6 +45,11 @@ The event kinds and payloads are:
 - `session.created` / `session.closed`: session `name`, emitted when the session enters or leaves a
   visible window tree. Undo emits a new `session.created`; grace-period finalization does not emit a
   second close.
+- `session.selected`: a window's selection moved. `session` and `name` are the newly selected session,
+  both absent when the selection was cleared, and `previous` is the id of the session that lost it,
+  absent when there was none. It fires for every cause: a click, navigation, `session select`, a
+  selected `session new` (after its `session.created`), and the reselection after the active session
+  closes. Re-selecting the selected session and raising another window emit nothing.
 - `tree.changed`: an empty payload and the affected window id. Name, membership, and ordering changes
   are coalesced for 100 ms per window, as is a `session context` set or clear that changes the value.
   Read `tree --json` for the current snapshot.

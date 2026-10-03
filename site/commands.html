@@ -645,6 +645,8 @@
                 <span style="font-family: &quot;JetBrains Mono&quot;, monospace">notify</span>,
                 <span style="font-family: &quot;JetBrains Mono&quot;, monospace">session.created</span>,
                 <span style="font-family: &quot;JetBrains Mono&quot;, monospace">session.closed</span>,
+                <span style="font-family: &quot;JetBrains Mono&quot;, monospace">session.selected</span> (a window's selection moved to this session, with the one that lost it as
+                <span style="font-family: &quot;JetBrains Mono&quot;, monospace">previous</span>; no session when the selection was cleared, and nothing for a window merely coming forward),
                 <span style="font-family: &quot;JetBrains Mono&quot;, monospace">tree.changed</span> (a 100 ms coalesced signal that a
                 window's names, membership, or ordering moved, or a session's context changed — read
                 <span style="font-family: &quot;JetBrains Mono&quot;, monospace; white-space: nowrap">tree --json</span> for the new

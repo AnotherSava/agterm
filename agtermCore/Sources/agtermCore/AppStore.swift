@@ -60,9 +60,14 @@ public final class AppStore {
     /// it reloads state rather than selecting.
     public var selectedSessionID: UUID? {
         didSet {
-            if selectedSessionID != oldValue { freshWorkspaceID = nil }
+            guard selectedSessionID != oldValue else { return }
+            freshWorkspaceID = nil
+            emitSessionSelected(previous: oldValue)
         }
     }
+
+    /// restoringSelection is true while `restore(from:)` runs: a reload is not a selection.
+    var restoringSelection = false
 
     /// Transient sidebar multi-selection, not persisted — `selectedSessionID` stays the durable active target.
     var sidebarSelectionRaw: [UUID] = []
@@ -460,12 +465,13 @@ public final class AppStore {
         } else {
             workspaces[wsIndex].sessions.append(session)
         }
+        // ahead of the selection, so a consumer hears of the session before it hears it was selected
+        emitSessionCreated(session, workspace: workspaceID)
         if select {
             selectedSessionID = session.id
             disableFocusIfSelectionOutsideSet(session.id) // a control-driven add into another workspace must reveal it
             recordRecency()
         }
-        emitSessionCreated(session, workspace: workspaceID)
         save()
         return session
     }
@@ -867,6 +873,9 @@ public final class AppStore {
     /// It defaults to false because reopening a closed window mid-process reloads its store through here,
     /// and that RUNTIME caller must not execute anything.
     public func restore(from snapshot: Snapshot, launchRestore: Bool = false) {
+        // to the end: the closing repair of a hidden selection is part of the reload too
+        restoringSelection = true
+        defer { restoringSelection = false }
         freshWorkspaceID = nil // live create-time state, never restored from disk
         // fold duplicate workspace ids into the first occurrence and keep only the first snapshot of a
         // repeated session id, else the rest stay unreachable past the first match and get re-saved.

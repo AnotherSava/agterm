@@ -1341,6 +1341,11 @@ side, and reads `lastAppliedIsDark` when bare. Refuse it outside XCUITest; provi
   The held exit reaches the app at once through `onExitHeld`, which forgets the pane's lead and records the
   hold for remote layout, but it carries no ssh status: `/usr/bin/login` discards it. Each pane holding and
   closing on its own is also right when one half of a split dies.
+- `session.selected` is emitted from `selectedSessionID`'s observer, so every writer gets it: direct
+  assignments in close, undo and reopen paths included, not only `selectSession`. `restore(from:)`
+  suppresses it, since a reload is not a selection. `addSession` emits `session.created` first.
+  The selection is per window, so a window coming forward emits nothing, and `tree.changed` still does
+  not fire on selection.
 - `remote.opened` / `remote.closed` are emitted by `emitSessionCreated` / `emitSessionClosed` themselves,
   gated on `remoteHost`, never from `zmx.attach`: the attach inserts the row before ssh starts, and a
   soft close emits `session.closed` while the pane is still alive for undo, whose `session.created` never

@@ -271,7 +271,8 @@ that window, omitted when no pick is pending.
 
 **events**: continuously print control events, subscribing from the current tail when no cursor is
 given. Use `--json` for one bare event object per line; filter with repeatable or comma-separated
-`--kind` over `status`, `notify`, `session.created`, `session.closed`, `tree.changed`, `pane.split`,
+`--kind` over `status`, `notify`, `session.created`, `session.closed`, `session.selected` (a window's
+selection moved; carries the session that lost it as `previous`), `tree.changed`, `pane.split`,
 `pane.scratch`, `remote.opened` and `remote.closed`; resume with paired `--run RUN --after SEQ`; and set
 page size with `--limit 1...1000`. The app retains 4,096 events for one process run. Cursor run changes,
 expiry, and ahead-of-tail errors are fatal and are never silently rebaselined. There is no
