@@ -1342,7 +1342,8 @@ side, and reads `lastAppliedIsDark` when bare. Refuse it outside XCUITest; provi
   soft close emits `session.closed` while the pane is still alive for undo, whose `session.created` never
   passes through the attach path. So the pair means row visibility only, every producer of those edges
   gets it, and no kind claims the ssh connection's state: the held exit says the command ended, never why.
-  A host-side pair (`client.attached` / `client.detached`) is the backlog item, not these kinds.
+  The host Mac gets no event for an attach; a host-side pair would be `client.attached` / `client.detached`,
+  never these kinds.
 - `Session.remoteHost` is immutable and set at construction, because `addSession` saves: a marker written
   afterwards would let one snapshot reach disk carrying the ssh command. `isPersistable` gates every
   producer — the launch snapshot, the Recent Closed session record, and a closed workspace's record, whose
