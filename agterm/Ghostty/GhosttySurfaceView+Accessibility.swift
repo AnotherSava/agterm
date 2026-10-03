@@ -184,7 +184,7 @@ extension GhosttySurfaceView {
     /// - `surface != nil` — `createSurface` (creation is DEFERRED while the backing size is zero, so a pane
     ///   in a window still being presented has no surface yet) and `destroySurface`;
     /// - `window?.isVisible` — `viewDidMoveToWindow` plus the miniaturize/deminiaturize and app hide/unhide
-    ///   observers (`observeWindowVisibilityChanges`), since `deckVisible` is pure MODEL state and a
+    ///   observers (`observeAccessibilityExposure`), since `deckVisible` is pure MODEL state and a
     ///   minimized window leaves it `true`.
     ///
     /// `axPostedExposed` latches the last announced value, so the several call sites that can fire for one
@@ -315,13 +315,10 @@ extension GhosttySurfaceView {
         return super.isAccessibilitySelectorAllowed(selector)
     }
 
-    /// Watch the transitions that move `window?.isVisible`, the `axExposed` term nothing else reports.
-    /// `deckVisible` is pure MODEL state, so miniaturizing the window — or hiding the app — leaves this pane
-    /// `deckVisible == true` while AppKit reports `isVisible == false`. Without these, `axExposed` went
-    /// true → false → true across a minimize/restore with no `.layoutChanged` posted at all.
-    /// `object: nil` like the key observers: the post recomputes from THIS view's own window, so another
-    /// window's notification costs one latch compare. Tokens join `focusObservers`, so teardown is unchanged.
-    func observeWindowVisibilityChanges() {
+    /// observeAccessibilityExposure posts the AX exposure change when a minimize or an app hide moves
+    /// `window?.isVisible`; the renderer's KVO on that key posts nothing to AX. `object: nil` because the
+    /// post recomputes from this view's own window.
+    func observeAccessibilityExposure() {
         let center = NotificationCenter.default
         let names: [Notification.Name] = [
             NSWindow.didMiniaturizeNotification, NSWindow.didDeminiaturizeNotification,

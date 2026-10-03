@@ -202,6 +202,29 @@ final class GhosttySurfaceViewTrackingTests: XCTestCase {
         XCTAssertEqual(surface.layer?.needsDisplayOnBoundsChange, true)
     }
 
+    func testAMiniaturizedWindowIsNotOnScreenAndRestoringItRevealsThePane() async throws {
+        let mini = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 320, height: 200),
+                            styleMask: [.titled, .miniaturizable], backing: .buffered, defer: false)
+        mini.isReleasedWhenClosed = false
+        let pane = GhosttySurfaceView(workingDirectory: NSTemporaryDirectory())
+        pane.wantsLayer = true
+        defer {
+            pane.removeFromSuperview()
+            mini.orderOut(nil)
+        }
+        mini.contentView?.addSubview(pane)
+        mini.orderFront(nil)
+        pane.layer?.contents = NSColor.red.cgColor
+        try await waitUntil("the pane is on screen") { pane.showsOnScreen && pane.rendererVisibilityTask == nil }
+
+        mini.miniaturize(nil)
+        try await waitUntil("the hide starts on minimize") { !pane.showsOnScreen && pane.rendererVisibilityTask != nil }
+        XCTAssertTrue(mini.isMiniaturized)
+
+        mini.deminiaturize(nil)
+        try await waitUntil("restore cancels the hide") { pane.showsOnScreen && pane.rendererVisibilityTask == nil }
+    }
+
     func testAPaneAttachedToAWindowNotYetOrderedInIsRevealedWhenItIs() async throws {
         let late = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 320, height: 200), styleMask: [.titled],
                             backing: .buffered, defer: false)

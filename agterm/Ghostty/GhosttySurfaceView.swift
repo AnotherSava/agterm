@@ -368,7 +368,7 @@ final class GhosttySurfaceView: NSView, PaneRoleMutableSurface {
         wantsLayer = true
         setupTrackingArea()
         observeKeyWindowChanges()
-        observeWindowVisibilityChanges()
+        observeAccessibilityExposure()
         observeDisplayWake()
     }
 
