@@ -1,18 +1,18 @@
 ---
 name: agterm
 description: >
-  Drive agterm, a native macOS terminal, through its agtermctl CLI. Use when
-  running inside an agterm session and asked to control it: create, rename, close, select or
-  reorder sessions and workspaces; split panes; toggle the scratch terminal; run a program in an overlay
-  and read its exit status; create and show HTML pages, interactive too, URLs or dev servers in an overlay with saved logins;
-  post a HUD or a desktop notification; show a picker or question dialog; display an image inline; type
-  into a session, copy its selection or search its scrollback; manage windows; change font size; set the
-  theme; reload or edit the keymap, event hooks and agterm-scoped ghostty config; run one of the user's
-  custom commands; read the screen of a session whose window is closed; subscribe to status,
-  notification, lifecycle, selection, pane-visibility and tree-change events.
-  Covers the window/workspace/session addressing model and the AGTERM_* environment a spawned shell sees,
-  attaching a session running on another Mac, the cookbook recipes, the running version, and diagnosing
-  problems or filing an agterm bug or feature request.
+  Drive agterm, a native macOS terminal, via the agtermctl CLI. Use inside an agterm session when
+  asked to control it: create, rename, close, select or
+  reorder sessions and workspaces; split panes; toggle the scratch terminal; run overlay programs
+  and read their exit status; create and show HTML pages, interactive too, URLs or dev servers in an overlay with saved logins;
+  post a HUD or desktop notification; show a picker or question dialog; display an image inline; type
+  into a session, copy its selection or search its scrollback; manage windows; set font size and
+  theme; reload or edit the keymap, event hooks and agterm-scoped ghostty config; run a custom command; read
+  a closed window's session screen; subscribe to status, notification, lifecycle, selection,
+  pane-visibility and tree-change events.
+  Covers window/workspace/session addressing, spawned shells' AGTERM_* variables,
+  attaching a session from another Mac, cookbook recipes, running version, diagnosing
+  problems and filing an agterm bug or feature request.
 when_to_use: >
   Trigger on: agterm, agtermctl, AGTERM_SESSION_ID, and, from inside a session, plain requests such as
   split the pane, close the overlay, show a message over the session, show a question dialog, agtermctl ask,
