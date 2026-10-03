@@ -7,8 +7,9 @@ description: >
   and read its exit status; create and show HTML pages, interactive too, URLs or dev servers in an overlay with saved logins;
   post a HUD or a desktop notification; show a picker or question dialog; display an image inline; type
   into a session, copy its selection or search its scrollback; manage windows; change font size; set the
-  theme; reload or edit the keymap, event hooks and agterm-scoped ghostty config; subscribe to status,
-  notification, lifecycle, pane-visibility and tree-change events.
+  theme; reload or edit the keymap, event hooks and agterm-scoped ghostty config; run one of the user's
+  custom commands; read the screen of a session whose window is closed; subscribe to status,
+  notification, lifecycle, selection, pane-visibility and tree-change events.
   Covers the window/workspace/session addressing model and the AGTERM_* environment a spawned shell sees,
   attaching a session running on another Mac, the cookbook recipes, the running version, and diagnosing
   problems or filing an agterm bug or feature request.
@@ -16,7 +17,7 @@ when_to_use: >
   Trigger on: agterm, agtermctl, AGTERM_SESSION_ID, and, from inside a session, plain requests such as
   split the pane, close the overlay, show a message over the session, show a question dialog, agtermctl ask,
   show an image inline, show this HTML page or artifact, make an HTML page or explainer for this and show
-  it, make a page that switches sessions or returns a choice, preview the report you generated, show this URL or the running dev server, keep me logged in to a page shown in an overlay, search the scrollback, attach a session from another Mac, what recipes are there,
+  it, make a page that switches sessions or returns a choice, preview the report you generated, show this URL or the running dev server, keep me logged in to a page shown in an overlay, search the scrollback, run my custom command, tell me when the selected session changes, attach a session from another Mac, what recipes are there,
   the keymap editor will not open.
 allowed-tools: Bash(agtermctl *)
 ---
