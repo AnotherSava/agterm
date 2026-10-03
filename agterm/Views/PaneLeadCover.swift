@@ -1,11 +1,10 @@
 import agtermCore
 import SwiftUI
 
-/// Covers a pane whose zmx client does not lead: what its terminal drew is laid out for another client's
-/// grid. Always mounted, so the pane's ZStack keeps one shape (see `sessionDetail`); it draws and takes
-/// hits only while the pane is covered. A click focuses the pane, whose next key press takes the lead.
-/// Every host of a pane's terminal mounts one, the deck, terminal zoom and the dashboard alike, directly
-/// over that terminal: a pane overlay above it is another program's and stays visible.
+/// PaneLeadCover covers a pane whose zmx client does not lead, since its terminal is laid out for another
+/// client's grid. It stays mounted so the pane's ZStack keeps one shape (see `sessionDetail`). The cover
+/// takes hits and a click focuses the pane; the reconnect note draws uncovered too and never takes hits.
+/// Every host of a pane's terminal mounts one directly over it, under any pane overlay.
 struct PaneLeadCover: View {
     let session: Session
     let pane: OverlayPane
