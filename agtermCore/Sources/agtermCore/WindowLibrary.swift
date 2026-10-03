@@ -579,8 +579,7 @@ public final class WindowLibrary {
 
     // MARK: - Persistence
 
-    /// Flushes every open window's store — the quit-time flush persisting cwd changes made since the last
-    /// structural mutation.
+    /// saveAllOpen is `saveAllOpenChecked()` with the result dropped. The exit flush uses `saveAllChecked()`.
     public func saveAllOpen() {
         saveAllOpenChecked()
     }

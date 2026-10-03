@@ -70,9 +70,10 @@ session drag are out of scope.
   [[settings]] for that contract.
 - `AppActions`, commands, palette construction, `ControlServer`, `SettingsModel`, and `SessionSwitcher`
   resolve through observable `WindowLibrary.activeStore`: frontmost open store, then first open store.
-- On termination, set `isTerminating` before windows close, then `saveAllOpen` and `saveIndex`. This preserves
-  live cwd changes, which structural saves may not capture. Selection and font use a roughly 0.3-second
-  `Debouncer`; structural mutations save synchronously and cancel pending saves.
+- On termination, set `isTerminating` before windows close, then `saveAllChecked` writes every open
+  store and the index. This preserves live cwd changes, which structural saves may not capture.
+  Selection and font use a roughly 0.3-second `Debouncer`; structural mutations save synchronously and
+  cancel pending saves.
 - Quit uses `applicationShouldTerminate` and a warning alert with host-free `openCounts` and
   `QuitPrompt.message`, which takes the launch decision's active restore mode:
   Live drops the shell clause and promises no reattachment.
