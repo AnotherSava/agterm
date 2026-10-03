@@ -169,7 +169,7 @@ renumbering. Do not reintroduce a count anywhere.
 - `keymap.reload`, `keymap.list`, `hooks.reload`, `hooks.list`, `browser.clear`, `config.reload`, `theme.set`, `theme.list`,
   `restore.capture`,
   `restore.clear`, `restore.mode`, `version`
-- `zmx.list`, `zmx.prune`, `zmx.kill`, `zmx.reset`, `zmx.tree`, `zmx.attach`, `zmx.present`
+- `zmx.list`, `zmx.screen`, `zmx.prune`, `zmx.kill`, `zmx.reset`, `zmx.tree`, `zmx.attach`, `zmx.present`
 
 `terminfo install` is a CLI-only command with no protocol counterpart, the one exemption from the
 protocol/dispatcher contract: it runs `infocmp` and `ssh` locally and never opens the socket, so there is
@@ -1115,6 +1115,10 @@ side, and reads `lastAppliedIsDark` when bare. Refuse it outside XCUITest; provi
   checked closed-window snapshots, the directory-versus-index comparison and the observed daemons into one
   answer; a standalone reader sees neither pending-close nor live-model state. There is no app-down path
   and no hybrid fallback, which would report a weaker truth under the same command name.
+- `zmx.screen` reads a daemon by the NAME `zmx list` prints, never by session: the session resolver sees
+  only open stores, and closed-window and unindexed daemons are the point of the command. It is not a
+  `session.text` fallback, whose default is the pane's own scrolled viewport; a daemon has no scroll
+  position and answers at its last leader's grid. It attaches nothing and moves no lead.
 - `zmx list` is the primitive; `prune` and `kill` act on rows it has already explained. Rows are the UNION
   of observed daemons and expected claims, so a leaked daemon and a pane whose daemon vanished are both
   visible. `state` is claimed/orphan/unknown/conflicted/pendingClose/foreign and `observation` is

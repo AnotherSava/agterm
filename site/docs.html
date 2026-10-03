@@ -3650,6 +3650,7 @@ command = "'/Users/you/.config/agterm/agent-status/agterm-codex-status.sh' stop"
                 and a notification afterwards says how many sessions the reset covered.
                 <span style="font-family: &quot;JetBrains Mono&quot;, monospace; color: #cbc6bc">agtermctl zmx reset --force</span> does the same without the dialog.
                 <span style="font-family: &quot;JetBrains Mono&quot;, monospace; color: #cbc6bc">agtermctl zmx list</span> shows every daemon and the pane that claims it,
+                <span style="font-family: &quot;JetBrains Mono&quot;, monospace; color: #cbc6bc">agtermctl zmx screen</span> prints one daemon's screen even when its window is closed,
                 <span style="font-family: &quot;JetBrains Mono&quot;, monospace; color: #cbc6bc">agtermctl zmx prune</span> clears the ones nothing claims, and
                 <span style="font-family: &quot;JetBrains Mono&quot;, monospace; color: #cbc6bc">agtermctl zmx kill</span> destroys a single pane's daemon. A closed window's panes stay
                 claimed with no clients attached, which is their resting state rather than something to clean up. Every one of

@@ -167,6 +167,9 @@ public protocol ControlActions {
     func listZmxDaemons() -> ControlResponse
     /// Kill the daemons no pane claims and nothing is attached to.
     func pruneZmxDaemons() -> ControlResponse
+    /// readZmxScreen returns a daemon's own screen by daemon name, which reaches a pane no open window
+    /// shows. `fullBuffer` adds the retained scrollback; `lines` keeps the last N of it.
+    func readZmxScreen(name: String, fullBuffer: Bool, lines: Int?) -> ControlResponse
     /// Destroy ONE pane's daemon. The host resolves the owner against the inventory rather than the open
     /// stores, since this reaches closed and unindexed claims the target resolver cannot see.
     func killZmxDaemon(target: String, window: String?, pane: ZmxPaneRole) -> ControlResponse
@@ -223,7 +226,7 @@ public struct ControlDispatcher {
                 .configReload, .notify, .themeSet, .themeList, .sidebar, .sidebarMode, .sidebarFlaggedLayout,
                 .sidebarExpand, .sidebarCollapse, .sidebarWidth, .restoreClear, .restoreCapture, .version:
             return dispatchAppCommand(request)
-        case .restoreMode, .zmxList, .zmxPrune, .zmxKill, .zmxReset, .zmxTree, .zmxAttach, .zmxPresent:
+        case .restoreMode, .zmxList, .zmxPrune, .zmxKill, .zmxReset, .zmxTree, .zmxAttach, .zmxPresent, .zmxScreen:
             return await dispatchZmxCommand(request)
         case .hooksReload, .hooksList:
             return dispatchHooksCommand(request)

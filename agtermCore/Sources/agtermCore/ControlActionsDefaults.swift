@@ -68,6 +68,10 @@ public extension ControlActions {
         ControlResponse(ok: false, error: ControlActionsUnsupported.message("zmx.prune"))
     }
 
+    func readZmxScreen(name _: String, fullBuffer _: Bool, lines _: Int?) -> ControlResponse {
+        ControlResponse(ok: false, error: ControlActionsUnsupported.message("zmx.screen"))
+    }
+
     func killZmxDaemon(target _: String, window _: String?, pane _: ZmxPaneRole) -> ControlResponse {
         ControlResponse(ok: false, error: ControlActionsUnsupported.message("zmx.kill"))
     }

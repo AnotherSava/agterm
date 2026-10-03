@@ -632,7 +632,9 @@ at the moment it is created.
 
 **zmx** - `zmx list` - every daemon behind a live session joined against the pane that claims it, under the
 restore status as a header; a CLOSED window's panes are claimed with zero clients, which is a resting
-state rather than a leak · `zmx prune` - kill the daemons no pane claims and nothing is attached to,
+state rather than a leak · `zmx screen NAME [--all|--lines N]` - a daemon's screen as text by the name
+`zmx list` prints, reaching a pane in a closed window, which `session text` cannot since it resolves only
+open-window sessions; attaches nothing · `zmx prune` - kill the daemons no pane claims and nothing is attached to,
 refusing outright on an incomplete or conflicted inventory, and reporting each daemon separately since a
 stale-socket cleanup is not a kill · `zmx kill --target ID --pane left|right --force` - destroy one pane's
 daemon and the process in it; all three are required because this kills a backend process that reaches a

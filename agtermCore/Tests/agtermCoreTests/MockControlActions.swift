@@ -59,6 +59,7 @@ final class MockControlActions: ControlActions {
         case restoreModeRead
         case restoreModeSet(RestoreMode)
         case zmxList
+        case zmxScreen(name: String, fullBuffer: Bool, lines: Int?)
         case zmxPrune
         case zmxKill(target: String, window: String?, pane: ZmxPaneRole)
         case zmxReset
@@ -468,6 +469,11 @@ final class MockControlActions: ControlActions {
     func listZmxDaemons() -> ControlResponse {
         calls.append(.zmxList)
         return nextZmxListResponse
+    }
+
+    func readZmxScreen(name: String, fullBuffer: Bool, lines: Int?) -> ControlResponse {
+        calls.append(.zmxScreen(name: name, fullBuffer: fullBuffer, lines: lines))
+        return ControlResponse(ok: true, result: ControlResult(text: "screen"))
     }
 
     func pruneZmxDaemons() -> ControlResponse {

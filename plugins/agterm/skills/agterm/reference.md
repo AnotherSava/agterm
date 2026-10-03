@@ -1728,6 +1728,14 @@ The header also carries `endpoint.executable` and `endpoint.socketDirectory`, wh
 needs to reach these daemons; a server older than remote sessions omits the key. A row whose daemon was
 created before the recorded first launch with this zmx build carries `outdated: true` (omitted otherwise).
 
+`agtermctl zmx screen NAME [--all|--lines N]` — print one daemon's screen as plain text. NAME is the
+daemon name `zmx list` prints, not a session id, so it reaches a pane whose window is closed;
+`session text` resolves only open-window sessions. The default is the daemon's current screen at the size its
+last leader gave it; it has no scroll position of its own, so this is not the pane's viewport.
+`--all` adds the scrollback the daemon retains and `--lines N`, N positive, keeps the last N lines of
+that; pass one or the other. The read
+attaches nothing, opens no window and changes no pane's size. A name with no readable daemon is an error.
+
 `agtermctl zmx prune` — kill the daemons no pane claims and nothing is attached to. It refuses outright on
 an incomplete or conflicted inventory. The gate is checked and revalidated rather than atomic: zmx has no
 kill-if-detached, so prune re-lists immediately before killing and drops anything that gained a client,

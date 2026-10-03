@@ -3366,6 +3366,18 @@
             </div>
             <div style="background: #22272b; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 11px; padding: 18px 20px; margin-bottom: 12px">
               <div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 13.5px; color: #6d82f3; line-height: 1.6; word-break: break-word">
+                agtermctl zmx screen &lt;name&gt; [--all|--lines N]
+              </div>
+              <div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 11.5px; color: #6b727a; margin-top: 6px">zmx.screen</div>
+              <p style="font-size: 15px; line-height: 1.65; color: #cbc6bc; margin: 10px 0 0">
+                Print one daemon's screen as plain text. The name is the daemon name <span style="font-family: &quot;JetBrains Mono&quot;, monospace">zmx list</span> prints, not a session id, so it reaches a pane whose window is closed; <span style="font-family: &quot;JetBrains Mono&quot;, monospace">session text</span> resolves only open-window sessions.
+              </p>
+              <p style="font-size: 13.5px; line-height: 1.6; color: #949ba4; margin: 8px 0 0">
+                The default is the daemon's current screen at the size its last leader gave it, with no scroll position of its own. <span style="font-family: &quot;JetBrains Mono&quot;, monospace">--all</span> adds the scrollback the daemon retains and <span style="font-family: &quot;JetBrains Mono&quot;, monospace">--lines N</span>, N positive, keeps the last N lines of that; pass one or the other. The read attaches nothing, opens no window and changes no pane's size; a name with no readable daemon is an error. The text is in <span style="font-family: &quot;JetBrains Mono&quot;, monospace">result.text</span>.
+              </p>
+            </div>
+            <div style="background: #22272b; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 11px; padding: 18px 20px; margin-bottom: 12px">
+              <div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 13.5px; color: #6d82f3; line-height: 1.6; word-break: break-word">
                 agtermctl zmx prune
               </div>
               <div style="font-family: &quot;JetBrains Mono&quot;, monospace; font-size: 11.5px; color: #6b727a; margin-top: 6px">zmx.prune</div>
