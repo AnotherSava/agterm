@@ -48,6 +48,7 @@ final class MockControlActions: ControlActions {
         case font(target: String?, window: String?, pane: StatusPane?, String)
         case keymapReload
         case keymapList
+        case keymapRun(name: String, target: String?, window: String?)
         case hooksReload
         case hooksList
         case browserClear
@@ -413,6 +414,11 @@ final class MockControlActions: ControlActions {
     func listKeymap() -> ControlResponse {
         calls.append(.keymapList)
         return nextKeymapListResponse
+    }
+
+    func runCustomCommand(name: String, target: String?, window: String?) -> ControlResponse {
+        calls.append(.keymapRun(name: name, target: target, window: window))
+        return ControlResponse(ok: true, result: ControlResult(id: "sess"))
     }
 
     func reloadHooks() -> ControlResponse {

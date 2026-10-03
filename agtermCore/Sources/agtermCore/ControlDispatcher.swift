@@ -69,6 +69,9 @@ public protocol ControlActions {
     func font(_ target: String?, window: String?, pane: StatusPane?, action: String) -> ControlResponse
     func reloadKeymap() -> ControlResponse
     func listKeymap() -> ControlResponse
+    /// runCustomCommand starts the one custom command named `name` against the addressed session. Ok
+    /// means the process started, not that it finished or succeeded.
+    func runCustomCommand(name: String, target: String?, window: String?) -> ControlResponse
     /// `hooks.reload` / `hooks.list`, app-global like the keymap pair.
     func reloadHooks() -> ControlResponse
     func listHooks() -> ControlResponse
@@ -222,7 +225,7 @@ public struct ControlDispatcher {
         case .workspaceNew, .workspaceSelect, .workspaceGo, .workspaceRename, .workspaceDelete,
                 .workspaceMove, .workspaceFocus, .workspaceFilter, .workspaceCollapse, .workspaceExpand:
             return dispatchWorkspaceCommand(request)
-        case .quick, .fontInc, .fontDec, .fontReset, .keymapReload, .keymapList,
+        case .quick, .fontInc, .fontDec, .fontReset, .keymapReload, .keymapList, .keymapRun,
                 .configReload, .notify, .themeSet, .themeList, .sidebar, .sidebarMode, .sidebarFlaggedLayout,
                 .sidebarExpand, .sidebarCollapse, .sidebarWidth, .restoreClear, .restoreCapture, .version:
             return dispatchAppCommand(request)
@@ -665,6 +668,12 @@ public struct ControlDispatcher {
             return actions.reloadKeymap()
         case .keymapList:
             return actions.listKeymap()
+        case .keymapRun:
+            // matched exactly: trimming here would make a name that differs only by spaces unreachable
+            guard let name = request.args?.name, !name.isEmpty else {
+                return ControlResponse(ok: false, error: "keymap.run requires a command name")
+            }
+            return actions.runCustomCommand(name: name, target: request.target, window: request.args?.window)
         case .version:
             return actions.appIdentity()
         case .configReload:

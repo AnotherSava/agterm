@@ -580,7 +580,7 @@ final class ControlServer {
                 .sessionResize, .surfaceZoom,
                 .surfaceCursor,
                 .sessionStatus, .sessionFlag, .sessionContext, .sessionSeen, .sessionRestore, .notify,
-                .fontInc, .fontDec, .fontReset, .keymapReload, .keymapList, .hooksReload, .hooksList, .browserClear,
+                .fontInc, .fontDec, .fontReset, .keymapReload, .keymapList, .keymapRun, .hooksReload, .hooksList, .browserClear,
                 .configReload, .themeSet, .themeList,
                 .sidebar, .sidebarMode, .sidebarFlaggedLayout, .sidebarExpand, .sidebarCollapse, .sidebarWidth,
                 .sessionType, .sessionCopy,

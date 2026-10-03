@@ -1423,6 +1423,14 @@ instead of the terminal: one page zoom shared by every HTML overlay, kept across
 `agtermctl keymap reload` — re-read and apply `keymap.conf`; returns `result.count` = the number of
 parse diagnostics (0 = clean). App-global (no `--window`).
 
+`agtermctl keymap run NAME [--target T] [--window W]` — start a custom command from `keymap.conf` by its
+exact name, as `keymap list` prints it. It runs as it does from the command palette, with the target
+session's focused pane, primary or split and never its scratch or an overlay, supplying the working
+directory, the selection and the `AGT_*` context; the default target is the active session, and from an
+HTML page the page's own session. `result.id` is that session. Ok means the process started: the
+command is detached, so its exit status and output are not reported, though a command with `--error-hud`
+still shows its panel. An unknown name answers `no custom command named NAME`.
+
 `agtermctl keymap list` — the read side of `keymap.reload`. App-global, no target and no args. Returns
 `result.keymap`:
 

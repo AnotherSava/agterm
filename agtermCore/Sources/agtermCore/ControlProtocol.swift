@@ -82,6 +82,7 @@ public enum Command: String, Codable, Sendable {
     case windowMinimize = "window.minimize"
     case keymapReload = "keymap.reload"
     case keymapList = "keymap.list"
+    case keymapRun = "keymap.run"
     case hooksReload = "hooks.reload"
     case hooksList = "hooks.list"
     case browserClear = "browser.clear"

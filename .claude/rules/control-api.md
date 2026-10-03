@@ -166,7 +166,7 @@ renumbering. Do not reintroduce a count anywhere.
 - `font.inc`, `font.dec`, `font.reset`
 - `window.new`, `.list`, `.select`, `.go`, `.close`, `.rename`, `.delete`, `.resize`, `.move`, `.zoom`,
   `.fullscreen`, `.minimize`
-- `keymap.reload`, `keymap.list`, `hooks.reload`, `hooks.list`, `browser.clear`, `config.reload`, `theme.set`, `theme.list`,
+- `keymap.reload`, `keymap.list`, `keymap.run`, `hooks.reload`, `hooks.list`, `browser.clear`, `config.reload`, `theme.set`, `theme.list`,
   `restore.capture`,
   `restore.clear`, `restore.mode`, `version`
 - `zmx.list`, `zmx.screen`, `zmx.prune`, `zmx.kill`, `zmx.reset`, `zmx.tree`, `zmx.attach`, `zmx.present`
@@ -533,7 +533,8 @@ side, and reads `lastAppliedIsDark` when bare. Refuse it outside XCUITest; provi
   Each admitted request calls its reply closure exactly once; a page its command closed never sees it.
 - `HtmlBridge` speaks the wire protocol only (`{cmd, target, args}`, dotted names, typed fields) and
   fills only what a page left out: its session for session-targeted commands (the `session.` names bar
-  `new`, `go` and `overlay.job.run`, plus `notify`, the `font.*` trio and a non-GUI `ask.open`), its pane
+  `new`, `go` and `overlay.job.run`, plus `notify`, the `font.*` trio, `keymap.run` and a non-GUI
+  `ask.open`), its pane
   for its own overlay commands, its window as `target` for the window-object commands and as `args.window`
   otherwise. An explicit target, `active`, window or batch resolves as over the socket; `zmx.attach` and
   `dashboard` keep their ids and still land in the page's window, and `hooks.*`, which refuse any window,
@@ -893,6 +894,11 @@ side, and reads `lastAppliedIsDark` when bare. Refuse it outside XCUITest; provi
 
 ## Keymap, config, theme, and sidebar
 
+- `keymap.run` starts a custom command by exact name against the addressed session, through the
+  palette's `CustomCommandRunner.run` with that session in place of the active one. The parser keeps one
+  command per name, so a name is the address; `CustomCommand.id` is minted per parse and never one.
+  Ok means the process started: the command is detached, so its exit status is not the reply's, and a
+  launch failure is an error carrying the reason.
 - `keymap.reload` shares GUI reload and returns diagnostic count. `keymap.list` reports:
   resolved built-in actions and override state; live AppKit menu equivalents/menu/title/selector; path;
   custom commands with `repeats` and `errorHud` (booleans), `errorPosition` (canonical, default center), and optional

@@ -52,6 +52,10 @@ public extension ControlActions {
         ControlResponse(ok: false, error: ControlActionsUnsupported.message("browser.clear"))
     }
 
+    func runCustomCommand(name _: String, target _: String?, window _: String?) -> ControlResponse {
+        ControlResponse(ok: false, error: ControlActionsUnsupported.message("keymap.run"))
+    }
+
     func readRestoreMode() -> ControlResponse {
         ControlResponse(ok: false, error: ControlActionsUnsupported.message("restore.mode"))
     }
