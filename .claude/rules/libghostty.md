@@ -131,6 +131,10 @@ paths:
   second or two after the notification. A failed create also re-arms `pendingSurfaceCreation`, so the
   layout path retries as well: the wake hook makes recovery TIMELY, not possible, and a view first
   mounted inside that residual window registered its observer too late for the wake that just fired.
+- Release builds strip libghostty's Zig-internal symbols and the linker reorders them, so `atos` resolves
+  only the exported `ghostty_*` ones. `scripts/symbolicate-frames.py BINARY ARCHIVE OFFSET...` matches the instructions before
+  each return address against `libghostty-internal.a` of the same `GHOSTTY_REV` and names a frame only on
+  a single match; an ambiguous or missing match is reported as such and exits 1.
 - `working_directory`, `initial_input`, and environment strdup buffers must outlive
   `ghostty_surface_new`; retain them until destruction.
 - Reparenting invalidates the drawable while leaving terminal buffer intact. `set_size` with an unchanged
