@@ -3502,7 +3502,8 @@ for (const ws of tree.workspaces) for (const s of ws.sessions) {
               <span style="font-family: &quot;JetBrains Mono&quot;, monospace; color: #cbc6bc">session.idle</span>
               is ignored so it does not double-fire with
               <span style="font-family: &quot;JetBrains Mono&quot;, monospace; color: #cbc6bc">session.status</span>.
-              Restart OpenCode after installing it.
+              Restart OpenCode after installing it. The plugin serves OpenCode 1.x; OpenCode 2 does not load 1.x plugins,
+              so it shows no status there.
             </p>
 
             <h3
