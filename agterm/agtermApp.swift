@@ -67,6 +67,13 @@ struct agtermApp: App {
     }
 
     init() {
+        #if DEBUG
+        // in the environment, ahead of every reader of the variable and of every child that inherits it
+        if let adopted = DebugStateDirectory.adopted(environment: ProcessInfo.processInfo.environment,
+                                                     liveDirectory: PersistenceStore.defaultDirectory) {
+            setenv(DebugStateDirectory.environmentKey, adopted, 1)
+        }
+        #endif
         let stateDirectory = ProcessInfo.processInfo.environment["AGTERM_STATE_DIR"]
             .map { URL(fileURLWithPath: $0, isDirectory: true) } ?? PersistenceStore.defaultDirectory
         liveResetMarkerStore = LiveResetMarkerStore(directory: stateDirectory)
