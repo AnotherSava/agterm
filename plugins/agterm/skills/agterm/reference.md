@@ -481,6 +481,9 @@ error keeps those names for compatibility.
   as real keystrokes (printable runs plus Return for each newline; no bracketed-paste markers).
   A trailing newline's Return is sent a moment after the text, so a long line submits in an agent TUI;
   Returns inside a multi-line payload are not spaced, so send an agent one line per call.
+  One very long line can still be taken as a paste by the receiver: Claude Code ran a 2000-character
+  `/rename ...` as a prompt, not as a slash command. agterm does not pace within a line; how a receiver
+  classifies a burst is its own rule, so a caller that hits this sends shorter pieces and checks the result.
   A shell's `$(...)` strips trailing newlines; pass the newline with `--stdin` or `$'...\n'`.
   `--stdin` reads the text from stdin instead of the argument. Any session is typable without `--select`,
   including a background one and one created moments ago: the main pane bounded-polls (12 × 30ms) for the
