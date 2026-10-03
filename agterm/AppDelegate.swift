@@ -405,7 +405,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             Self.exitFlush(pending: liveReset?.armablePending, steps: ExitFlushSteps(
                 capture: { _ = self.captureOnExit?(library.allOpenSessions()) },
                 finalize: { library.finalizeAllPendingCloses() },
-                saveChecked: { library.saveAllChecked() },
                 save: { library.saveAllChecked() },
                 arm: { selection in
                     guard let store = self.liveResetMarkerStore else { return false }
@@ -423,24 +422,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     struct ExitFlushSteps {
         let capture: () -> Void
         let finalize: () -> Void
-        let saveChecked: () -> Bool
-        let save: () -> Void
+        let save: () -> Bool
         let arm: (LiveReset.Selection) -> Bool
     }
 
     /// exitFlush runs in a fixed order: capture, finalize pending closes, then save. A pending Live
-    /// sessions reset takes the CHECKED save and arms only when it reports every snapshot and the index
-    /// written; capture is invoked, not judged, since its count is best effort. Returns whether a reset
-    /// was armed.
+    /// sessions reset arms only when the save reports every snapshot and the index written; capture is
+    /// invoked, not judged, since its count is best effort. Returns whether a reset was armed.
     @discardableResult
     static func exitFlush(pending: LiveReset.Selection?, steps: ExitFlushSteps) -> Bool {
         steps.capture()
         steps.finalize()
-        guard let pending else {
-            steps.save()
-            return false
-        }
-        guard steps.saveChecked() else {
+        let saved = steps.save()
+        guard let pending else { return false }
+        guard saved else {
             logger.error("live sessions reset not armed: window state or the index did not save")
             return false
         }
