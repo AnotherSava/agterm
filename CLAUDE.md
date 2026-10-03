@@ -114,8 +114,8 @@ C-boundary concurrency before changing the bridge.
   untracked and disappear with worktree removal.
 - Symlink an artifact set only while the main checkout's matching stamp equals what the worktree's
   `setup.sh` would write for that set: the revision for ghostty, and `ZMX_REV`, `ZMX_TARGET` and the
-  digest of `scripts/zmx-patches/*.patch` for zmx, so a target or a patch change invalidates a set whose
-  revision still matches. When either differs, remove that
+  digest of `scripts/zmx-patches/*.patch` and `scripts/zmx-patches/ghostty/*.patch` for zmx, so a target
+  or a patch change invalidates a set whose revision still matches. When either differs, remove that
   set's artifact and stamp links before setup runs and let it build locally. `setup.sh` writes stamps
   through symlinks while replacing linked artifacts with local files and directories, so a linked build
   leaves the main checkout claiming a build its artifacts never came from.
