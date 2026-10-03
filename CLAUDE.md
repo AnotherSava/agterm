@@ -133,7 +133,9 @@ C-boundary concurrency before changing the bridge.
   `com.umputun.agterm.debug`, distinct from Release.
 - A Debug build launched with `AGTERM_STATE_DIR` unset or empty adopts
   `~/Library/Application Support/agterm-debug` (`DebugStateDirectory`), exporting it so its shells and
-  their `agtermctl` resolve the same socket. A non-empty value always wins, the live directory included. Manual runs still pass a short `/tmp`
+  their `agtermctl` resolve the same socket. A non-empty value always wins, the live directory included.
+  Config is not adopted: that launch reads the default config directory, `~/.config/agterm` unless the
+  setting names another. Manual runs still pass a short `/tmp`
   directory: the adopted one is shared by every unisolated Debug launch and persists between them.
 - A second Release instance without `AGTERM_STATE_DIR` still shares state, but does not take the
   running app's control socket. `ControlServer.init` takes an exclusive `flock` on `<socket>.lock` and

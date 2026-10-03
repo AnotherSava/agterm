@@ -126,7 +126,8 @@ paths:
   blur is not pixel-identical to CGS blur. Reapply on key/main/fullscreen and appearance changes.
   `SystemAccessibilityObserver` bridges workspace accessibility changes to every window; SwiftUI's
   environment independently makes palettes/switcher opaque and changes the hint.
-- `configDirectory` resolution is explicit setting, else `<AGTERM_STATE_DIR>/config`, else
+- `configDirectory` resolution is explicit setting, else `<AGTERM_STATE_DIR>/config` unless that
+  directory is the `agterm-debug` sibling (`DebugStateDirectory.configStateDirectory`), else
   `~/.config/agterm`. It contains keymap, scoped Ghostty config, and restore denylist. Seed starter files
   only when absent. Keymap starter documents every action/default and token but rebinds nothing; reload
   posts `.agtermKeymapChanged`, never a surface config update.

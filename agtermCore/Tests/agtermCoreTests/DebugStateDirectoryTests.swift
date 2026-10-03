@@ -18,6 +18,17 @@ struct DebugStateDirectoryTests {
                                             liveDirectory: Self.live) == nil)
     }
 
+    @Test func theAdoptedDirectoryKeepsTheUsersConfigAndAnyOtherRedirectsIt() {
+        let adopted = "/Users/me/Library/Application Support/agterm-debug"
+        #expect(DebugStateDirectory.configStateDirectory(environment: ["AGTERM_STATE_DIR": adopted],
+                                                         liveDirectory: Self.live) == nil)
+        #expect(DebugStateDirectory.configStateDirectory(environment: [:], liveDirectory: Self.live) == nil)
+        #expect(DebugStateDirectory.configStateDirectory(environment: ["AGTERM_STATE_DIR": "/tmp/s"],
+                                                         liveDirectory: Self.live) == "/tmp/s")
+        #expect(DebugStateDirectory.configStateDirectory(environment: ["AGTERM_STATE_DIR": Self.live.path],
+                                                         liveDirectory: Self.live) == Self.live.path)
+    }
+
     @Test func theAdoptedSocketPathFitsTheUnixSocketLimit() throws {
         let home = URL(fileURLWithPath: "/Users/averagelongusername/Library/Application Support/agterm", isDirectory: true)
         let adopted = try #require(DebugStateDirectory.adopted(environment: [:], liveDirectory: home))
