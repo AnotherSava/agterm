@@ -69,6 +69,9 @@ public protocol ControlActions {
     func font(_ target: String?, window: String?, pane: StatusPane?, action: String) -> ControlResponse
     func reloadKeymap() -> ControlResponse
     func listKeymap() -> ControlResponse
+    /// runCustomCommand starts the one custom command named `name` against the addressed session. Ok
+    /// means the process started, not that it finished or succeeded.
+    func runCustomCommand(name: String, target: String?, window: String?) -> ControlResponse
     /// `hooks.reload` / `hooks.list`, app-global like the keymap pair.
     func reloadHooks() -> ControlResponse
     func listHooks() -> ControlResponse
@@ -167,6 +170,9 @@ public protocol ControlActions {
     func listZmxDaemons() -> ControlResponse
     /// Kill the daemons no pane claims and nothing is attached to.
     func pruneZmxDaemons() -> ControlResponse
+    /// readZmxScreen returns a daemon's own screen by daemon name, which reaches a pane no open window
+    /// shows. `fullBuffer` adds the retained scrollback; `lines` keeps the last N of it.
+    func readZmxScreen(name: String, fullBuffer: Bool, lines: Int?) -> ControlResponse
     /// Destroy ONE pane's daemon. The host resolves the owner against the inventory rather than the open
     /// stores, since this reaches closed and unindexed claims the target resolver cannot see.
     func killZmxDaemon(target: String, window: String?, pane: ZmxPaneRole) -> ControlResponse
@@ -219,11 +225,11 @@ public struct ControlDispatcher {
         case .workspaceNew, .workspaceSelect, .workspaceGo, .workspaceRename, .workspaceDelete,
                 .workspaceMove, .workspaceFocus, .workspaceFilter, .workspaceCollapse, .workspaceExpand:
             return dispatchWorkspaceCommand(request)
-        case .quick, .fontInc, .fontDec, .fontReset, .keymapReload, .keymapList,
+        case .quick, .fontInc, .fontDec, .fontReset, .keymapReload, .keymapList, .keymapRun,
                 .configReload, .notify, .themeSet, .themeList, .sidebar, .sidebarMode, .sidebarFlaggedLayout,
                 .sidebarExpand, .sidebarCollapse, .sidebarWidth, .restoreClear, .restoreCapture, .version:
             return dispatchAppCommand(request)
-        case .restoreMode, .zmxList, .zmxPrune, .zmxKill, .zmxReset, .zmxTree, .zmxAttach, .zmxPresent:
+        case .restoreMode, .zmxList, .zmxPrune, .zmxKill, .zmxReset, .zmxTree, .zmxAttach, .zmxPresent, .zmxScreen:
             return await dispatchZmxCommand(request)
         case .hooksReload, .hooksList:
             return dispatchHooksCommand(request)
@@ -662,6 +668,12 @@ public struct ControlDispatcher {
             return actions.reloadKeymap()
         case .keymapList:
             return actions.listKeymap()
+        case .keymapRun:
+            // matched exactly: trimming here would make a name that differs only by spaces unreachable
+            guard let name = request.args?.name, !name.isEmpty else {
+                return ControlResponse(ok: false, error: "keymap.run requires a command name")
+            }
+            return actions.runCustomCommand(name: name, target: request.target, window: request.args?.window)
         case .version:
             return actions.appIdentity()
         case .configReload:

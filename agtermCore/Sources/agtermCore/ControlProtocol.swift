@@ -82,6 +82,7 @@ public enum Command: String, Codable, Sendable {
     case windowMinimize = "window.minimize"
     case keymapReload = "keymap.reload"
     case keymapList = "keymap.list"
+    case keymapRun = "keymap.run"
     case hooksReload = "hooks.reload"
     case hooksList = "hooks.list"
     case browserClear = "browser.clear"
@@ -105,6 +106,7 @@ public enum Command: String, Codable, Sendable {
     case zmxTree = "zmx.tree"
     case zmxAttach = "zmx.attach"
     case zmxPresent = "zmx.present"
+    case zmxScreen = "zmx.screen"
     /// A viewer's helper claiming a remote overlay job; after an ok reply the connection carries job frames.
     case sessionOverlayJobRun = "session.overlay.job.run"
     /// UI-TEST-ONLY: forces the app-level appearance (`light`|`dark` via `args.name`) so an XCUITest can

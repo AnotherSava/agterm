@@ -48,6 +48,7 @@ final class MockControlActions: ControlActions {
         case font(target: String?, window: String?, pane: StatusPane?, String)
         case keymapReload
         case keymapList
+        case keymapRun(name: String, target: String?, window: String?)
         case hooksReload
         case hooksList
         case browserClear
@@ -59,6 +60,7 @@ final class MockControlActions: ControlActions {
         case restoreModeRead
         case restoreModeSet(RestoreMode)
         case zmxList
+        case zmxScreen(name: String, fullBuffer: Bool, lines: Int?)
         case zmxPrune
         case zmxKill(target: String, window: String?, pane: ZmxPaneRole)
         case zmxReset
@@ -414,6 +416,11 @@ final class MockControlActions: ControlActions {
         return nextKeymapListResponse
     }
 
+    func runCustomCommand(name: String, target: String?, window: String?) -> ControlResponse {
+        calls.append(.keymapRun(name: name, target: target, window: window))
+        return ControlResponse(ok: true, result: ControlResult(id: "sess"))
+    }
+
     func reloadHooks() -> ControlResponse {
         calls.append(.hooksReload)
         return nextHooksReloadResponse
@@ -468,6 +475,11 @@ final class MockControlActions: ControlActions {
     func listZmxDaemons() -> ControlResponse {
         calls.append(.zmxList)
         return nextZmxListResponse
+    }
+
+    func readZmxScreen(name: String, fullBuffer: Bool, lines: Int?) -> ControlResponse {
+        calls.append(.zmxScreen(name: name, fullBuffer: fullBuffer, lines: lines))
+        return ControlResponse(ok: true, result: ControlResult(text: "screen"))
     }
 
     func pruneZmxDaemons() -> ControlResponse {

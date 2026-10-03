@@ -1,22 +1,23 @@
 ---
 name: agterm
 description: >
-  Drive agterm, a native macOS terminal, through its agtermctl CLI. Use when
-  running inside an agterm session and asked to control it: create, rename, close, select or
-  reorder sessions and workspaces; split panes; toggle the scratch terminal; run a program in an overlay
-  and read its exit status; create and show HTML pages, interactive too, URLs or dev servers in an overlay with saved logins;
-  post a HUD or a desktop notification; show a picker or question dialog; display an image inline; type
-  into a session, copy its selection or search its scrollback; manage windows; change font size; set the
-  theme; reload or edit the keymap, event hooks and agterm-scoped ghostty config; subscribe to status,
-  notification, lifecycle, pane-visibility and tree-change events.
-  Covers the window/workspace/session addressing model and the AGTERM_* environment a spawned shell sees,
-  attaching a session running on another Mac, the cookbook recipes, the running version, and diagnosing
-  problems or filing an agterm bug or feature request.
+  Drive agterm, a native macOS terminal, via the agtermctl CLI. Use inside an agterm session when
+  asked to control it: create, rename, close, select or
+  reorder sessions and workspaces; split panes; toggle the scratch terminal; run overlay programs
+  and read their exit status; create and show HTML pages, interactive too, URLs or dev servers in an overlay with saved logins;
+  post a HUD or desktop notification; show a picker or question dialog; display an image inline; type
+  into a session, copy its selection or search its scrollback; manage windows; set font size and
+  theme; reload or edit the keymap, event hooks and agterm-scoped ghostty config; run a custom command; read
+  a closed window's session screen; subscribe to status, notification, lifecycle, selection,
+  pane-visibility and tree-change events.
+  Covers window/workspace/session addressing, spawned shells' AGTERM_* variables,
+  attaching a session from another Mac, cookbook recipes, running version, diagnosing
+  problems and filing an agterm bug or feature request.
 when_to_use: >
   Trigger on: agterm, agtermctl, AGTERM_SESSION_ID, and, from inside a session, plain requests such as
   split the pane, close the overlay, show a message over the session, show a question dialog, agtermctl ask,
   show an image inline, show this HTML page or artifact, make an HTML page or explainer for this and show
-  it, make a page that switches sessions or returns a choice, preview the report you generated, show this URL or the running dev server, keep me logged in to a page shown in an overlay, search the scrollback, attach a session from another Mac, what recipes are there,
+  it, make a page that switches sessions or returns a choice, preview the report you generated, show this URL or the running dev server, keep me logged in to a page shown in an overlay, search the scrollback, run my custom command, tell me when the selected session changes, attach a session from another Mac, what recipes are there,
   the keymap editor will not open.
 allowed-tools: Bash(agtermctl *)
 ---
@@ -271,7 +272,8 @@ that window, omitted when no pick is pending.
 
 **events**: continuously print control events, subscribing from the current tail when no cursor is
 given. Use `--json` for one bare event object per line; filter with repeatable or comma-separated
-`--kind` over `status`, `notify`, `session.created`, `session.closed`, `tree.changed`, `pane.split`,
+`--kind` over `status`, `notify`, `session.created`, `session.closed`, `session.selected` (a window's
+selection moved; carries the session that lost it as `previous`), `tree.changed`, `pane.split`,
 `pane.scratch`, `remote.opened` and `remote.closed`; resume with paired `--run RUN --after SEQ`; and set
 page size with `--limit 1...1000`. The app retains 4,096 events for one process run. Cursor run changes,
 expiry, and ahead-of-tail errors are fatal and are never silently rebaselined. There is no
@@ -603,7 +605,7 @@ Visibility/mode act on the frontmost window; `sidebar expand`/`collapse`/`width`
 
 **font** — `font inc|dec|reset [--pane left|right|scratch]` — change a session pane's font size (omitted/`left` = main pane, `right` = the split pane, `scratch` = the scratch terminal). Read the resulting size back from `tree` (`fontSize`/`splitFontSize`/`scratchFontSize` per pane). A pane under an HTML overlay zooms the page instead, read back as `htmlOverlays[].zoom`.
 
-**keymap** — `keymap reload` — re-read `keymap.conf` (prints the parse-diagnostic count). `keymap list` — show the resolved keymap AND the live menu key equivalents: every built-in with its current binds (the menu chord first, then any `|`-separated alternatives a key monitor delivers), the custom commands, the parse diagnostics, and what the menu bar is actually dispatching. Use it to check a rebind took effect, to find a free chord, or to spot a chord the keymap resolved but the menu is not carrying.
+**keymap** — `keymap reload` — re-read `keymap.conf` (prints the parse-diagnostic count). `keymap run NAME [--target T] [--window W]` — start one of the user's custom commands by the name `keymap list` prints, against that session; the reply means it started, not that it succeeded. `keymap list` — show the resolved keymap AND the live menu key equivalents: every built-in with its current binds (the menu chord first, then any `|`-separated alternatives a key monitor delivers), the custom commands, the parse diagnostics, and what the menu bar is actually dispatching. Use it to check a rebind took effect, to find a free chord, or to spot a chord the keymap resolved but the menu is not carrying.
 
 Custom commands opt into a failure panel with `command "Build" [chord] --error-hud ./build.sh`, placed
 with `--error-position POS` and `--error-pane left|right`; see
@@ -632,7 +634,9 @@ at the moment it is created.
 
 **zmx** - `zmx list` - every daemon behind a live session joined against the pane that claims it, under the
 restore status as a header; a CLOSED window's panes are claimed with zero clients, which is a resting
-state rather than a leak · `zmx prune` - kill the daemons no pane claims and nothing is attached to,
+state rather than a leak · `zmx screen NAME [--all|--lines N]` - a daemon's screen as text by the name
+`zmx list` prints, reaching a pane in a closed window, which `session text` cannot since it resolves only
+open-window sessions; attaches nothing · `zmx prune` - kill the daemons no pane claims and nothing is attached to,
 refusing outright on an incomplete or conflicted inventory, and reporting each daemon separately since a
 stale-socket cleanup is not a kill · `zmx kill --target ID --pane left|right --force` - destroy one pane's
 daemon and the process in it; all three are required because this kills a backend process that reaches a
