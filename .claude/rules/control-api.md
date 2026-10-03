@@ -1338,7 +1338,12 @@ side, and reads `lastAppliedIsDark` when bare. Refuse it outside XCUITest; provi
   resets the reporting modes the remote left on, shows a reconnecting bar naming the host, reports `RemoteLinkNotice` (`OSC 2;agterm-remote;<lead nonce>:lost`, intercepted beside
   `zmx-role;`) and waits on `cat`, which ends with the app's pty. The pane then never reaches `onExitHeld`;
   `PaneLead.linkLost` believes only the current attachment's nonce and runs the same `remotePaneStopped`
-  cleanup. `RemoteReconnectBook` probes (`RemoteSession.probeCommand`) on the remote tick with
+  cleanup. A failed probe's stderr is kept as the entry's `reason`, last non-empty line, sanitized and
+  capped, replaced by every failure and nil when ssh said nothing; it is never classified, since an
+  offline host and a refused login both exit 255 and the retry must not give up on either. The pane's
+  child is `cat` with echo off, so nothing can be printed into it: `RemoteReconnectNote` inside
+  `PaneLeadCover` draws the line and the surface node's `reconnect` reads it, both from the entry, so
+  both go with the wait. `RemoteReconnectBook` probes (`RemoteSession.probeCommand`) on the remote tick with
   `RemoteRetryBackoff`, and a host that answers gets `reattachPane(claim: false)`, covered only when the
   origin had reported a role or the attach it replaced dropped before its first report, and
   `remotePaneResumed`. Re-running the attach in the shell was rejected: it

@@ -39,6 +39,9 @@ struct PaneLeadCover: View {
                 .accessibilityElement(children: .combine)
                 .accessibilityIdentifier("pane-lead-cover-\(pane.rawValue)")
             }
+            if !hidden, let reason = RemoteReconnectBook.shared.readback(pane: identity)?.reason {
+                RemoteReconnectNote(reason: reason, pane: pane)
+            }
         }
         .contentShape(Rectangle())
         .onTapGesture { focusPane() }
@@ -54,5 +57,29 @@ struct PaneLeadCover: View {
     private func focusPane() {
         let surface = pane == .left ? session.surface : session.splitSurface
         (surface as? GhosttySurfaceView)?.focusAfterReparent()
+    }
+}
+
+/// RemoteReconnectNote shows what ssh said on the last failed probe, never the outcome of the attach that
+/// follows a probe that answered.
+struct RemoteReconnectNote: View {
+    let reason: String
+    let pane: OverlayPane
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Spacer(minLength: 0)
+            Text(verbatim: "ssh: \(reason)")
+                .font(.system(size: 12, design: .monospaced))
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 2)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .foregroundStyle(.black)
+                .background(Color.yellow)
+                .accessibilityIdentifier("remote-reconnect-note-\(pane.rawValue)")
+        }
+        .allowsHitTesting(false)
     }
 }

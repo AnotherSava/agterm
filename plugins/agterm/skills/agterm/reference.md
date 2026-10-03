@@ -241,11 +241,16 @@ the read side of `font --pane`; each omitted when that pane isn't realized. `fon
 default/left target (the main pane, or the promoted split survivor once the primary exits — the same pane
 `font --pane left` writes); only the main pane's size survives a relaunch, so the split/scratch sizes and a
 promoted survivor are live-only — read them back here rather than from the snapshot), and `surfaces` (array
-of `{id, kind, active, visible, backedByZmx?, lead?}` where `kind` is
+of `{id, kind, active, visible, backedByZmx?, lead?, reconnect?}` where `kind` is
 `left`|`right`|`scratch`|`overlay`|`overlay-left`|`overlay-right`).
 Primary/split surfaces report `backedByZmx`; scratch and overlays omit it. `lead` is `leader`, `follower`
 or `unowned`: whether this Mac's window size is the one the pane's program sees. A pane that does not
 lead is covered. Absent until the pane's terminal reports one (see Remote sessions).
+`reconnect` is present on a remote pane whose ssh lost its connection while agterm waits to attach it
+again: `failures` is the retry streak, the probes of its host that failed in a row plus one for a link
+that dropped again soon after attaching, and `reason` is what ssh said on the last failed probe, omitted
+when it said nothing. Its message can help distinguish an offline host from a refused login. It goes
+when the pane is attached again or closed.
 The surface `id` is the address for `surface zoom`; hidden-but-alive split/scratch surfaces are included
 so a script can zoom them without changing split/scratch visibility first. Caveat: `active`/`visible`
 derive from the session's own flags, not from zoom — and `visible` reads false for a pane behind a
@@ -1813,7 +1818,8 @@ window leaves the frontmost window unchanged. `SESSION` is the
 new local session's `id`; read `remoteHost` on its tree node. The remote is resolved AGAIN before anything
 is created, so a session that has gone since the listing fails and creates nothing. Everything reported
 here is a failure found before that point — a connection that starts and later drops is an ordinary pane
-exit: ssh's own 255 shows a reconnecting bar naming the host and reconnects by itself; any other exit prints
+exit: ssh's own 255 shows a reconnecting bar naming the host and reconnects by itself, with ssh's last
+failed-probe message along the pane's bottom edge and on the pane's `reconnect` in `tree`; any other exit prints
 one line naming the host, the session, the pane and the exit status and holds on Ghostty's press-any-key prompt.
 agterm adds ssh keepalive (`ServerAliveInterval 5`, `ServerAliveCountMax 2`) to the pane's ssh unless the
 user's config sets a nonzero interval, so a dead link is noticed within about fifteen seconds. When the

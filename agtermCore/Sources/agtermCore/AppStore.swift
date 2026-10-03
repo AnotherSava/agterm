@@ -312,7 +312,8 @@ public final class AppStore {
                     return ControlSurfaceNode(id: id, kind: surface.rawValue, active: surface.isActive(in: session),
                                               visible: surface.isVisible(in: session),
                                               backedByZmx: session.zmxBacking(for: surface),
-                                              lead: ZmxLeadBook.shared.role(pane: session.paneIdentity(for: surface)))
+                                              lead: ZmxLeadBook.shared.role(pane: pane),
+                                              reconnect: RemoteReconnectBook.shared.readback(pane: pane))
                 }
                 return ControlSessionNode(id: session.id.uuidString, name: session.displayName,
                                           cwd: session.effectiveCwd, title: session.oscTitle,

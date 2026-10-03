@@ -463,7 +463,9 @@
                 primary/split pane is currently zmx-backed; each primary/split object in
                 <span style="font-family: &quot;JetBrains Mono&quot;, monospace">surfaces</span> reports its own value, and its
                 <span style="font-family: &quot;JetBrains Mono&quot;, monospace">lead</span>: <span style="font-family: &quot;JetBrains Mono&quot;, monospace">leader</span>, <span style="font-family: &quot;JetBrains Mono&quot;, monospace">follower</span> or <span style="font-family: &quot;JetBrains Mono&quot;, monospace">unowned</span>, which says whether this Mac's
-                window size is the one the pane's program sees. A pane that does not lead is covered. Absent until the
+                window size is the one the pane's program sees. A pane that does not lead is covered. A remote pane waiting to be attached again after its ssh dropped also carries
+                <span style="font-family: &quot;JetBrains Mono&quot;, monospace">reconnect</span>, with <span style="font-family: &quot;JetBrains Mono&quot;, monospace">failures</span> (the retry streak) and, when ssh said anything on the last failed try, its <span style="font-family: &quot;JetBrains Mono&quot;, monospace">reason</span>.
+                <span style="font-family: &quot;JetBrains Mono&quot;, monospace">lead</span> is absent until the
                 pane's terminal reports one),
                 <span style="font-family: &quot;JetBrains Mono&quot;, monospace">liveAttribution</span> and
                 <span style="font-family: &quot;JetBrains Mono&quot;, monospace">splitLiveAttribution</span> (primary and split pane

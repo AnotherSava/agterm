@@ -18,19 +18,36 @@ public struct ControlSurfaceNode: Codable, Sendable, Equatable {
     /// does not lead is covered and its reads come from the daemon. Nil until the pane's zmx reports a
     /// role, which a zmx or an origin without explicit leadership never does.
     public let lead: ZmxLeadRole?
+    /// reconnect is present while this pane's ssh lost its connection and the app waits to attach it
+    /// again, omitted otherwise.
+    public let reconnect: ControlReconnect?
 
     public init(id: String, kind: String, active: Bool, visible: Bool) {
         self.init(id: id, kind: kind, active: active, visible: visible, backedByZmx: nil)
     }
 
     public init(id: String, kind: String, active: Bool, visible: Bool, backedByZmx: Bool?,
-                lead: ZmxLeadRole? = nil) {
+                lead: ZmxLeadRole? = nil, reconnect: ControlReconnect? = nil) {
         self.id = id
         self.kind = kind
         self.active = active
         self.visible = visible
         self.backedByZmx = backedByZmx
         self.lead = lead
+        self.reconnect = reconnect
+    }
+}
+
+/// ControlReconnect is a remote pane's wait to be attached again. `failures` is the backoff streak: probes
+/// of its host that failed in a row, plus one for a link that dropped again soon after attaching.
+/// `reason` is what ssh said on the last failed probe, omitted when it said nothing.
+public struct ControlReconnect: Codable, Sendable, Equatable {
+    public let failures: Int
+    public let reason: String?
+
+    public init(failures: Int, reason: String?) {
+        self.failures = failures
+        self.reason = reason
     }
 }
 
