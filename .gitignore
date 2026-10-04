@@ -14,8 +14,6 @@ build/
 agterm.xcodeproj/
 .swiftpm/
 
-.DS_Store
-
 # app state / runtime files (only appear if AGTERM_STATE_DIR is pointed at the repo)
 settings.json
 windows.json
@@ -37,3 +35,11 @@ __pycache__/
 !.claude/
 .claude/*
 !.claude/rules/
+# fork-local: the conventions record, project memory, memos, settings and the commit gate live here
+# so they travel between machines.
+# Create PR branches from upstream/master, not from this fork's master, or these lines ride along.
+!.claude/memory/
+!.claude/memos/
+!.claude/conventions
+!.claude/settings.json
+!.claude/commit-checks.sh
