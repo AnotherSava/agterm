@@ -255,7 +255,9 @@ and `reason` is what ssh said on the last failed probe, omitted
 when it said nothing. Its message can help distinguish an offline host from a refused login. It goes
 when the pane is attached again or closed.
 The surface `id` is the address for `surface zoom`; hidden-but-alive split/scratch surfaces are included
-so a script can zoom them without changing split/scratch visibility first. Caveat: `active`/`visible`
+so a script can zoom them without changing split/scratch visibility first. A pane under a running
+overlay is addressable the same way: zooming it shows the session while the overlay keeps running, and
+leaving zoom brings the overlay back. Caveat: `active`/`visible`
 derive from the session's own flags, not from zoom — and `visible` reads false for a pane behind a
 FLOATING overlay even though it is visually on screen; address by `id`/`kind`, and read the zoom state
 from the top-level `zoomedSurface`. Workspace nodes carry

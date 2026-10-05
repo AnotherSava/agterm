@@ -533,8 +533,8 @@ window; read back as `minimized` on `window list`).
 **surface** — `surface zoom [show|hide|toggle] [--target surface:<session-id>:left|right|scratch|overlay|overlay-left|overlay-right|quick] [--window W]`
 — zoom a terminal surface to fill the window (sidebar hidden; a slim title-bar strip with an exit
 button remains). Omit `--target` to use the active surface;
-copy an explicit surface id from `tree --json` to address a hidden split/scratch or a background
-session. `quick` is the one target that is not a window surface: it grows the quick-terminal panel to
+copy an explicit surface id from `tree --json` to address a hidden split/scratch, a pane under a
+running overlay, or a background session. `quick` is the one target that is not a window surface: it grows the quick-terminal panel to
 fill its screen, takes no `--window`, is refused while the panel is hidden, and is never what an omitted
 `--target` resolves to. `hide` exits zoom; `toggle`
 enters/exits only this zoom mode, not macOS window zoom.
