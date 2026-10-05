@@ -30,6 +30,14 @@ base repository to `upstream`, so `gh run list`, `gh repo view` and the rest rep
 unless `--repo AnotherSava/agterm` is passed. That returned an empty run list for a sha pushed to the
 fork, which reads exactly like CI lagging behind the push.
 
+**The same split makes `/commit` re-review what it has already reviewed.** The commit skill's
+`change_scope.py` bounds the unpushed range with `@{upstream}..HEAD`, reaching
+`HEAD --not --remotes` only when no upstream resolves, so nothing checks that the tracked remote is
+the push remote — and here every commit already on the fork counts as unpushed. Expect `clean-code`
+and `docs-relevance` to verdict `RUN` on every run, over files they reviewed in an earlier one.
+`git rev-list HEAD --not --remotes` is the count that is actually true. Reported to the dotfiles
+repo's own session on 2026-10-04; its user left the one-line fix for later, so this stands.
+
 **Cut PR branches from `upstream/master`, never from this fork's master.** This fork's `.gitignore`
 differs from upstream's two ways, and a branch based on this master carries both into the diff. It
 carries re-include lines upstream does not have — for the conventions record, project memory, memos,
