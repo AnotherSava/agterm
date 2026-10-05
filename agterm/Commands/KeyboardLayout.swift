@@ -8,7 +8,7 @@ import Foundation
 /// character it types. A non-Latin one (Russian, Greek, Hebrew, Arabic, Thai) reports false and binds by
 /// physical position, since nothing it types can spell a chord.
 ///
-/// This covers the two MONITOR-driven paths only — custom commands and `undo_close`. Every other built-in
+/// This covers only the shortcuts the app resolves from a key event itself. Every other built-in
 /// rides an AppKit menu key equivalent, which resolves on its own; ⌘N and ⌘W were observed firing on a
 /// Russian layout, but how AppKit reaches them was not isolated here, and `.claude/rules/control-api.md`
 /// records a conflicting account for ⌘C/⌘V/⌘A. Do not cite this type as evidence either way.
