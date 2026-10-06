@@ -498,6 +498,8 @@ public final class Session: Identifiable {
 
     /// What this Mac keeps about a session attached from another one; nil for a local session.
     @ObservationIgnored public internal(set) var remotePresentation: RemotePresentationState?
+    /// remoteConnectionRevision changes with the connection, so an observer of `remoteConnection` is told.
+    var remoteConnectionRevision = 0
 
     /// Tells attached viewers the panel is gone. Set when the HUD is published, so a panel whose body was
     /// never written, and so never published, withdraws nothing.
@@ -987,14 +989,5 @@ public final class Session: Identifiable {
         searchTotal = nil
         searchSelected = nil
         searchSurface = nil
-    }
-}
-
-extension String {
-    /// Trimmed of surrounding whitespace and newlines, nil if empty — the one normalizer for the
-    /// rename/displayName "blank after trim" rule.
-    var trimmedOrNil: String? {
-        let trimmed = trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmed.isEmpty ? nil : trimmed
     }
 }

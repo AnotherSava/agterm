@@ -108,6 +108,7 @@ struct agtermApp: App {
                                           zmxClient: restored.zmxClient,
                                           zmxOutdatedBefore: restored.zmxOutdatedBefore)
         _controlServer = State(initialValue: controlServer)
+        actions.remoteAttacher = controlServer
         LinkOpener.shared.mode = { settingsModel.settings.effectiveLinkOpenMode }
         LinkOpener.shared.overlay = { [weak controlServer] url, session in
             controlServer?.openLinkOverlay(url, session: session) ?? false
@@ -280,6 +281,9 @@ struct agtermApp: App {
                         }
                         if !library.hasReopened, !settingsModel.hooksDiagnostics.isEmpty {
                             NotificationManager.shared.notifyHooksDiagnostics(count: settingsModel.hooksDiagnostics.count)
+                        }
+                        if !library.hasReopened, settingsModel.remotes.issueCount > 0 {
+                            NotificationManager.shared.notifyRemotesDiagnostics(count: settingsModel.remotes.issueCount)
                         }
                         // same for ghostty config diagnostics, recorded at boot by GhosttyApp.loadConfig
                         // (applicationDidFinishLaunching, before registration): same `hasReopened` gate.
