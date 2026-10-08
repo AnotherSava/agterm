@@ -26,7 +26,7 @@ Full detail for every `agtermctl` command. See `SKILL.md` for the model and addr
 
 `agtermctl events [--json] [--kind KIND ...] [--run UUID --after SEQ] [--limit N]` continuously
 prints control events. Each poll is one ordinary socket connection and one `events.read` response.
-The CLI immediately reads again after a non-empty page and waits 250 ms only after an empty page.
+The CLI immediately reads again after a non-empty page and waits 250 ms after an empty page.
 
 With no cursor, the first read subscribes from now: it returns an empty batch anchored at the current
 tail, and the CLI prints only later events. The app keeps a non-destructive ring of the latest 4,096

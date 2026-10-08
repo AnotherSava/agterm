@@ -92,6 +92,10 @@ paths:
   Support. CLI `--socket` overrides. Explicit short paths avoid Unix `sun_path` near 104 bytes. Use 0600.
 - Each connection sets `SO_NOSIGPIPE` and a 5-second receive timeout. Close on non-EINTR read failure,
   including EAGAIN. Start is idempotent and logs bind failure without blocking launch.
+- `agtermctl events` branches on the connect errno: once it holds a cursor it retries `ECONNREFUSED`
+  with that cursor, bounded by `EventStreamState.retryBudget`, and treats every other failure as fatal.
+  A change to what a refused or absent server returns must keep that path in step.
+  `reference.md` owns the user contract.
 - `ControlServer.init` takes an exclusive non-blocking `flock` on `<socketPath>.lock`, and start refuses
   to bind while another process holds it. Ownership is decided at INIT, not at start: the launch window's
   surfaces are built during the initial render pass and snapshot `AGTERM_SOCKET` into the pty environment,
