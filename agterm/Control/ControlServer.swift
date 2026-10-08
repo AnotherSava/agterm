@@ -303,7 +303,7 @@ final class ControlServer {
         chmod(socketPath, 0o600)
 
         // the accept loop is serial, so a main-thread stall queues every client here; a short backlog
-        // refused them instead, status hooks included.
+        // would refuse them, status hooks included.
         guard listen(fd, SOMAXCONN) == 0 else {
             log("control listen() failed: \(String(cString: strerror(errno)))")
             close(fd)
