@@ -1,8 +1,8 @@
 ---
 name: agterm
 description: >
-  Drive agterm, a native macOS terminal, via agtermctl. Use in an agterm session when
-  asked to control it: create, rename, close, select or
+  Drive agterm, a native macOS terminal, via agtermctl. Use in an agterm session to
+  control it: create, rename, close, select or
   reorder sessions and workspaces; split panes; toggle the scratch terminal; run overlay programs
   and read their exit status; create and show HTML pages, interactive too, URLs or dev servers in an overlay with saved logins;
   post a HUD/caption or notification; show a picker or question dialog; show an image inline; type
@@ -11,13 +11,13 @@ description: >
   a closed window's session screen; subscribe to status, notification, lifecycle, selection,
   pane-visibility and tree-change events.
   Covers window/workspace/session addressing, AGTERM_* variables,
-  attaching a session from another Mac, cookbook recipes, running/installed version, diagnosing
+  attaching a session from another Mac, cookbook recipes, running/installed version, upgrades, diagnosing
   problems, filing a bug or feature request.
 when_to_use: >
   Trigger on: agterm, agtermctl, AGTERM_SESSION_ID, and, from inside a session, plain requests such as
   split the pane, close the overlay, show a message over the session, show a question dialog, agtermctl ask,
   show an image inline, show this HTML page or artifact, make an HTML page or explainer for this and show
-  it, make a page that switches sessions or returns a choice, preview the report you generated, show this URL or the running dev server, keep me logged in to a page shown in an overlay, search the scrollback, run my custom command, tell me when the selected session changes, attach a session from another Mac, copy this to the clipboard, was agterm upgraded under the running app, what recipes are there,
+  it, make a page that switches sessions or returns a choice, preview the report you generated, show this URL or the running dev server, keep me logged in to a page shown in an overlay, search the scrollback, run my custom command, tell me when the selected session changes, attach a session from another Mac, copy this to the clipboard, was agterm upgraded under the running app, upgrade agterm without losing sessions, what recipes are there,
   the keymap editor will not open.
 allowed-tools: Bash(agtermctl *)
 ---
@@ -153,6 +153,12 @@ you open overlays / type into whatever the user has selected, not your own sessi
 - **Re-run commands** starts each captured foreground command again. It does not reconnect to the old process.
 - **Live sessions** runs every primary and split pane through zmx and reattaches to the same process. It requires
   zsh as the macOS login shell. Scratch, overlay, and quick terminals stay temporary.
+
+Upgrading: with Live sessions already active, install the new version, quit agterm and open it again. Local
+primary and split panes reattach to the same processes and no reset is needed. `agtermctl version` adds an
+`installed:` line when the installed version or recorded commit differs from the running app. When switching
+from Fresh shells or Re-run commands to Live sessions, the current shells end at the first clean quit. The
+first Live launch starts captured foreground commands again where possible; shell state is lost.
 
 On a clean quit, agterm leaves live daemons running and captures each open pane's foreground command as a
 fallback. A surviving daemon ignores that payload on the next launch. If an orderly machine restart removed

@@ -3704,6 +3704,17 @@ command = "'/Users/you/.config/agterm/agent-status/agterm-codex-status.sh' stop"
                 <span
                   style="position: absolute; left: 0; top: 2px; color: #6d82f3; font-family: &quot;JetBrains Mono&quot;, monospace"
                   >›</span
+                ><strong style="color: #e6e1d7">Upgrading keeps live sessions running.</strong> With Live sessions already
+                active, install the new version (<span style="font-family: &quot;JetBrains Mono&quot;, monospace; color: #cbc6bc">brew upgrade --cask agterm</span>, or a release download), quit agterm
+                and open it again: local primary and split panes reattach to the same processes, and no reset is needed.
+                <span style="font-family: &quot;JetBrains Mono&quot;, monospace; color: #cbc6bc">agtermctl version</span> prints the installed version when it differs from the running app.
+                When switching from Fresh shells or Re-run commands to Live sessions, the current shells end at the first
+                clean quit. The first Live launch starts captured foreground commands again where possible; shell state is lost.
+              </li>
+              <li style="font-size: 15px; line-height: 1.65; color: #cbc6bc; padding-left: 22px; position: relative">
+                <span
+                  style="position: absolute; left: 0; top: 2px; color: #6d82f3; font-family: &quot;JetBrains Mono&quot;, monospace"
+                  >›</span
                 ><strong style="color: #e6e1d7">Live mode reattaches the running process.</strong> Every primary and split pane
                 starts through zmx. Scratch, overlay, and quick terminals stay temporary. A clean quit ends the attach client while
                 the daemon and its process continue, and captures each open pane's foreground command as a fallback. The next launch
