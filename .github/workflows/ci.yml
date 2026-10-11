@@ -149,7 +149,7 @@ jobs:
             agterm/Resources/ghostty
             agterm/Resources/terminfo
             .ghostty-build-stamp
-          key: ghosttykit-v1-${{ steps.revisions.outputs.ghostty }}
+          key: ghosttykit-v1-${{ steps.revisions.outputs.ghostty }}-${{ hashFiles('scripts/ghostty-patches/*.patch') }}
       - name: Cache zmx
         uses: actions/cache@v6
         with:
