@@ -68,6 +68,20 @@ Its Zig test is `agterm session link regex`, run with the `url regex` test it ex
 
 Remove the patch when `GHOSTTY_REV` lets the embedder add a link pattern, and add the pattern there.
 
+## Fork patches
+
+Patches named `fork-NNNN-*.patch` are carried by this fork only and stay out of PR branches cut from
+`upstream/master`. They sort after upstream's numbered patches, so upstream adding one never renames them,
+and each is generated against `GHOSTTY_REV` with every upstream patch applied.
+
+### fork-0001: clicks-only mouse leaves the pointer
+
+`fork-0001` gives the pointer back to the terminal while a program asks only for button presses (X10 or
+DECSET 1000), as Claude Code's fullscreen UI does. Such a program still receives the wheel, but ⌘-hover and
+⌘-click reach links, plain drag selects, and presses are no longer reported to it, without holding Shift. A
+program tracking motion (1002 or 1003) keeps the mouse as upstream gives it. Upstream treats ⌘⇧ under any
+capture as deliberate (ghostty #1416). Re-apply it by hand whenever `GHOSTTY_REV` moves.
+
 ## Removing the last patch
 
 Remove `GHOSTTY_PATCH_DIR`, the digest calculation and apply loop in `setup.sh`, and either set

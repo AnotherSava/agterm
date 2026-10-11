@@ -1,0 +1,78 @@
+--- ghostty-orig/src/Surface.zig	2026-10-10 14:16:01
++++ ghostty/src/Surface.zig	2026-10-10 14:17:21
+@@ -2738,7 +2738,7 @@
+         // 1. mouse reporting is off
+         // OR
+         // 2. mouse reporting is on and we are not reporting shift to the terminal
+-        if (self.io.terminal.flags.mouse_event == .none or
++        if (!self.mouseTracksMotion() or
+             (self.mouse.mods.shift and !self.mouseShiftCapture(false)))
+         {
+             // Refresh our link state
+@@ -2753,7 +2753,7 @@
+                 log.warn("failed to refresh links err={}", .{err});
+                 break :mouse_mods;
+             };
+-        } else if (self.io.terminal.flags.mouse_event != .none and !self.mouse.mods.shift) {
++        } else if (self.mouseTracksMotion() and !self.mouse.mods.shift) {
+             // If we have mouse reports on and we don't have shift pressed, we reset state
+             _ = try self.rt_app.performAction(
+                 .{ .surface = self },
+@@ -2773,7 +2773,7 @@
+     // needed, depending on the key state.
+     if ((SurfaceMouse{
+         .physical_key = event.key,
+-        .mouse_event = self.io.terminal.flags.mouse_event,
++        .mouse_event = if (self.mouseTracksMotion()) self.io.terminal.flags.mouse_event else .none,
+         .mouse_shape = self.io.terminal.mouse_shape,
+         .mods = self.mouse.mods,
+         .over_link = self.mouse.over_link,
+@@ -3674,6 +3674,12 @@
+ fn isMouseReporting(self: *const Surface) bool {
+     return self.config.mouse_reporting and
+         self.io.terminal.flags.mouse_event != .none;
++}
++
++/// agterm patch: only a program tracking motion (DECSET 1002/1003) owns the pointer. One asking for
++/// X10 or 1000 still receives the wheel, but presses, selection and link hover stay with the terminal.
++fn mouseTracksMotion(self: *const Surface) bool {
++    return terminal.mouse.eventSendsMotion(self.io.terminal.flags.mouse_event);
+ }
+ 
+ pub fn mouseReportingActive(self: *Surface) bool {
+@@ -3930,7 +3936,7 @@
+     {
+         self.renderer_state.mutex.lockUncancelable(global.io());
+         defer self.renderer_state.mutex.unlock(global.io());
+-        if (self.isMouseReporting()) report: {
++        if (self.isMouseReporting() and self.mouseTracksMotion()) report: {
+             // If we have shift-pressed and we aren't allowed to capture it,
+             // then we do not do a mouse report.
+             if (mods.shift and !shift_capture) break :report;
+@@ -4395,7 +4401,7 @@
+ fn mouseModsWithCapture(self: *Surface, mods: input.Mods) input.Mods {
+     // In any of these scenarios, whatever mods are set (even shift)
+     // are preserved.
+-    if (self.io.terminal.flags.mouse_event == .none) return mods;
++    if (!self.mouseTracksMotion()) return mods;
+     if (!mods.shift) return mods;
+     if (self.mouseShiftCapture(false)) return mods;
+ 
+@@ -4627,7 +4633,7 @@
+     if ((over_link or
+         self.mouse.link_point == null or
+         (self.mouse.link_point != null and !self.mouse.link_point.?.eql(pos_vp))) and
+-        (self.io.terminal.flags.mouse_event == .none or
++        (!self.mouseTracksMotion() or
+             (self.mouse.mods.shift and !self.mouseShiftCapture(false))))
+     {
+         // If we were previously over a link, we always update. We do this so that if the text
+@@ -4636,7 +4642,7 @@
+     }
+ 
+     // Do a mouse report
+-    if (self.isMouseReporting()) report: {
++    if (self.isMouseReporting() and self.mouseTracksMotion()) report: {
+         // Shift overrides mouse "grabbing" in the window, taken from Kitty.
+         // This only applies if there is a mouse button pressed so that
+         // movement reports are not affected.

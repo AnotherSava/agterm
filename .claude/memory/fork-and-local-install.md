@@ -68,6 +68,15 @@ macOS 27.0.1 with Xcode 27.0 (27A266a): Debug and Release both built, 4,039 host
 rather than in `CLAUDE.md` because that file is upstream's and an edit to it would ride into every
 PR branch cut from this fork's master.
 
+**This fork carries a libghostty patch that upstream does not.** Upstream's
+`scripts/ghostty-patches/` holds its own `0001` (the teardown drain); the fork adds
+`0002-clicks-only-mouse-leaves-pointer.patch`, and the README there says what each changes. The
+digest in `.ghostty-build-stamp` covers both, so a stamp from an upstream-only build never matches this
+checkout's. The user chose the patch's wider scope on 2026-10-10 knowing its cost: no program that tracks only
+clicks (DECSET 1000 or X10, such as htop, mc, or Claude Code's fullscreen UI) receives mouse presses in
+this build. Keep `0002` out of PR branches cut from `upstream/master`, number it after upstream's patches,
+and re-apply it by hand whenever `GHOSTTY_REV` moves or upstream's patches change the same lines.
+
 **How to undo it.** The notarized cask bundle that was replaced is kept, signature intact, at
 `~/agterm-0.25.0-cask.app`, and the pre-switch state directory at
 `~/agterm-backup-20261004-104201`. Restoring the bundle means removing `/Applications/agterm.app`
