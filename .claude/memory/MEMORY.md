@@ -1,1 +1,1 @@
-- [Fork and local install](fork-and-local-install.md) — remotes are inverted, and `/Applications/agterm.app` is a local ad-hoc build rather than the cask
+- [Fork and local install](fork-and-local-install.md) — remotes are inverted, and `/Applications/agterm.app` is a local ad-hoc build rather than the cask, and libghostty carries a fork-only patch

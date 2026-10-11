@@ -1,4 +1,4 @@
-# libghostty teardown patch
+# libghostty patches
 
 `setup.sh` applies these patches to `GHOSTTY_REV` before building GhosttyKit. The revision and patch
 digest form `.ghostty-build-stamp`; CI keys its GhosttyKit cache on both. A changed patch rebuilds the
@@ -13,7 +13,7 @@ closes as well as the queue, and releases owned payloads for discarded messages.
 
 Remove the patch when `GHOSTTY_REV` includes an equivalent upstream fix whose drain also stays active
 through `renderer.deinit()`. Upstream PR 14444's current ordering does not yet meet that condition.
-When removing the final patch, remove `GHOSTTY_PATCH_DIR`, the digest calculation and apply loop in
+When no patch remains, remove `GHOSTTY_PATCH_DIR`, the digest calculation and apply loop in
 `setup.sh`, and either set `GHOSTTY_STAMP="$GHOSTTY_REV"` or restore both the stamp comparison and stamp write to use
 `GHOSTTY_REV` directly. Remove the patch digest from the CI cache key too. Preserve the three shutdown
 regressions in `scripts/test-surface-teardown.py`: one title producer, eight title producers with one
@@ -23,3 +23,11 @@ Apply the patch to a `GHOSTTY_REV` checkout before editing. Run `zig fmt --check
 and `zig build test -Dtest-filter=teardown -Demit-macos-app=false` there. Regenerate the patch with
 `git diff -- src/App.zig src/Surface.zig` and verify `git apply --check` against a second pristine
 checkout. Do not change queue capacity or move `ghostty_surface_free` off the app thread.
+
+`0002` is carried by this fork only and stays out of PR branches cut from `upstream/master`. It gives the
+pointer back to the terminal while a program asks only for button presses (X10 or DECSET 1000), as Claude
+Code's fullscreen UI does. Such a program still receives the wheel, but ⌘-hover and ⌘-click reach links,
+plain drag selects, and presses are no longer reported to it, without holding Shift. A program tracking
+motion (1002 or 1003) keeps the mouse as upstream gives it. Upstream treats ⌘⇧ under any capture as
+deliberate (ghostty #1416). It is a `diff -ruN` against a tree with `0001` applied; regenerate it against
+such a tree and re-apply it by hand whenever `GHOSTTY_REV` moves.
