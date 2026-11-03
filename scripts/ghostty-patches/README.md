@@ -29,5 +29,8 @@ pointer back to the terminal while a program asks only for button presses (X10 o
 Code's fullscreen UI does. Such a program still receives the wheel, but ⌘-hover and ⌘-click reach links,
 plain drag selects, and presses are no longer reported to it, without holding Shift. A program tracking
 motion (1002 or 1003) keeps the mouse as upstream gives it. Upstream treats ⌘⇧ under any capture as
-deliberate (ghostty #1416). It is a `diff -ruN` against a tree with `0001` applied; regenerate it against
-such a tree and re-apply it by hand whenever `GHOSTTY_REV` moves.
+deliberate (ghostty #1416). `ghostty_surface_mouse_captured` follows the same rule, so agterm's link chords
+treat 1000 as uncaptured too: ⌘⇧-click opens the browser and ⌘⌥-click reveals, as in a plain shell. The two
+`GhosttySurfaceViewInputTests` cases asserting upstream's captured chords under 1000 are skipped in this fork.
+It is a `git diff` against a tree with `0001` applied; regenerate it against such a tree and re-apply it by
+hand whenever `GHOSTTY_REV` moves.
