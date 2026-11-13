@@ -98,6 +98,12 @@ public protocol ControlActions {
     /// Axis-aware entry point. Its default delegates to the original method so an existing conformer does
     /// not have to implement the new requirement until it needs axis support.
     func splitSession(_ target: String?, window: String?, mode: String?, axis: SplitAxis?) -> ControlResponse
+    /// `command` runs in a split this call creates, overriding the session's `newSplitCommand`; the host
+    /// refuses it when the split already exists. The default delegates when there is no command.
+    func splitSession(_ target: String?, window: String?, mode: String?, axis: SplitAxis?,
+                      command: String?) -> ControlResponse
+    /// Store or clear (nil) the command every newly created split of the session runs.
+    func setSessionNewSplitCommand(_ target: String?, window: String?, command: String?) -> ControlResponse
     /// Tear the split pane down rather than hide it, the write side `splitSession`'s `on|off|toggle` cannot
     /// express: the surface dies and `hasSplit`/`splitRatio`/`splitFocused` go nil in `tree`.
     func closeSessionSplit(_ target: String?, window: String?) -> ControlResponse

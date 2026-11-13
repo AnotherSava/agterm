@@ -359,7 +359,10 @@ extension ControlServer: ControlActions {
 
     /// splitSession with `focus` false leaves first responder and a new split's pane focus alone, for a split
     /// another Mac asked for.
-    func splitSession(_ target: String?, window: String?, mode: String?, axis: SplitAxis?, focus: Bool) -> ControlResponse {
+    /// `command` is refused once the split exists: showing a hidden split keeps its shell, so the command
+    /// would silently never run.
+    func splitSession(_ target: String?, window: String?, mode: String?, axis: SplitAxis?, focus: Bool,
+                      command: String? = nil) -> ControlResponse {
         return resolver.resolveSession(target, window: window) { store, id in
             guard let session = store.session(withID: id) else {
                 return ControlResponse(ok: false, error: "no such session: \(target ?? "active")")
@@ -367,13 +370,21 @@ extension ControlServer: ControlActions {
             guard let parsedMode = ControlToggleMode.parse(mode) else {
                 return ControlResponse(ok: false, error: "invalid split mode: \(mode ?? "toggle")")
             }
+            if command != nil {
+                guard parsedMode != .off else {
+                    return ControlResponse(ok: false, error: "--command needs a mode that shows the split (on or toggle)")
+                }
+                guard !session.hasSplit else {
+                    return ControlResponse(ok: false, error: "split already exists; --command applies only when one is created")
+                }
+            }
             switch parsedMode {
             case .on:
-                store.setSplitVisibility(id, shown: true, axis: axis, focusesNewSplit: focus)
+                store.setSplitVisibility(id, shown: true, axis: axis, focusesNewSplit: focus, command: command)
             case .off:
                 store.setSplitVisibility(id, shown: false)
             case .toggle:
-                store.toggleSplit(id, axis: axis, focusesNewSplit: focus)
+                store.toggleSplit(id, axis: axis, focusesNewSplit: focus, command: command)
             }
             if focus { actions.focusSplitPane(session, wantSplit: session.splitFocused) }
             return ControlResponse(ok: true, result: ControlResult(id: id.uuidString))

@@ -463,6 +463,9 @@ omitted when expanded).
   legacy left/right behavior. The GUI actions are ⌘D for vertical and ⌘⇧D for horizontal; either
   transposes a shown split of the other orientation. Hide keeps it alive; `close` destroys the pane and
   whatever runs in it.
+- `session split command "<cmd>" | --clear` - what every newly created split of the session runs instead of a
+  login shell, ⌘D included; e.g. a script that opened an ssh tab sets `ssh -t host` so ⌘D opens a second
+  connection. `session split on --command` does it for one split. Local sessions only. Read back as `newSplitCommand`.
 - `session lead [--pane left|right|scratch]`: for a session shared with another Mac, take the lead of a pane here
   (what a key press or click on its "in use" cover does). `tree`'s `surfaces[].lead` reads `leader`/`follower`/
   `unowned`. On the Mac the session runs on, a covered pane still takes `session type`/`text`.

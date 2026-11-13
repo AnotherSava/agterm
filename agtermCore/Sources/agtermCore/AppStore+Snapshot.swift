@@ -72,7 +72,7 @@ extension AppStore {
                         tint: session.tint, parentID: session.parentID,
                         collapsed: session.isExpanded ? nil : true, ended: session.ended ? true : nil,
                         scratchPaneIdentity: headless ? nil : session.localScratchIdentity,
-                        leads: savedLeads(session))
+                        leads: savedLeads(session), newSplitCommand: session.newSplitCommand)
     }
 
     private func savedLeads(_ session: Session) -> [UUID: String]? {
@@ -130,7 +130,9 @@ extension AppStore {
         session.commandWait = snapshot.commandWait ?? false
         session.splitInitialCommand = hasSplit ? snapshot.splitInitialCommand : nil
         session.splitCommandWait = hasSplit ? (snapshot.splitCommandWait ?? false) : false
+        session.newSplitCommand = snapshot.newSplitCommand
         session.wasRestored = true
+        session.splitWasRestored = hasSplit
         session.backgroundWatermark = snapshot.backgroundWatermark
         session.paneBackgrounds = PaneBackgrounds(left: snapshot.paneBackgrounds?.left,
                                                   right: hasSplit ? snapshot.paneBackgrounds?.right : nil)

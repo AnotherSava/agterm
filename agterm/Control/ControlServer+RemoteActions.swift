@@ -21,6 +21,7 @@ extension ControlServer {
     /// remoteRoute reads `request` once, on the main actor, before it is dispatched: nil runs it here as usual; a
     /// route sends it to the server off the accept thread, with what it was decided on captured now.
     func remoteRoute(_ request: ControlRequest) -> RemoteRoute? {
+        if let route = splitCommandRemoteRefusal(request) { return route }
         if let route = attachedRoute(request) { return route }
         if let route = historyRoute(request) { return route }
         if let route = attachedRecentRoute(request) { return route }

@@ -66,7 +66,7 @@ extension LaunchSeedProvider {
         case .ordinary:
             let capture = session.takePendingForegroundCommand(pane: pane)
             let plan = CommandRestore.restorePlan(.init(
-                wasRestored: session.wasRestored,
+                wasRestored: session.paneWasRestored(pane),
                 restoreEnabled: policy.restoreEnabled,
                 hadForeground: capture != nil,
                 foregroundInput: restoreInitialInput(capture, policy: policy),
@@ -79,7 +79,7 @@ extension LaunchSeedProvider {
             // live was requested and is unavailable: neither pending slot is read, so both stay armed for
             // the next launch, and the durable command is held back exactly as a restored rerun-off pane.
             let plan = CommandRestore.restorePlan(.init(
-                wasRestored: session.wasRestored,
+                wasRestored: session.paneWasRestored(pane),
                 restoreEnabled: false,
                 hadForeground: false,
                 foregroundInput: nil,
@@ -97,7 +97,7 @@ extension LaunchSeedProvider {
     @MainActor
     private static func shouldPace(session: Session, pane: StatusPane, disposition: ZmxLaunch.Disposition,
                                    policy: LaunchSeedPolicy) -> Bool {
-        guard session.wasRestored else { return false }
+        guard session.paneWasRestored(pane) else { return false }
         switch disposition {
         case .wrapped(let configuration):
             // an observed daemon is attached to, which runs no program.

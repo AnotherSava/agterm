@@ -192,7 +192,7 @@ renumbering. Do not reintroduce a count anywhere.
 - `workspace.new`, `.rename`, `.delete`, `.select`, `.go`, `.move`, `.focus`, `.filter`, `.flag`, `.collapse`,
   `.expand`, `.tint`
 - `session.new`, `.duplicate`, `.remote.new`, `.companion.new`, `.companion.page`, `.companion.duplicate`, `.companion.convert`, `.companion.move`, `.companion.promote`, `.companion.page.attach`, `.page`, `.collapse`, `.expand`, `.close`, `.terminate`, `.select`, `.rename`, `.reveal`, `.move`, `.type`, `.split`,
-  `.split.close`, `.swap`, `.lead`,
+  `.split.close`, `.split.command`, `.swap`, `.lead`,
   `.scratch`, `.focus`, `.resize`, `.go`, `.copy`, `.paste`, `.paste.text`, `.selectall`, `.text`, `.search`, `.status`,
   `.flag`, `.tint`, `.info`, `.seen`, `.restore`, `.restart`, `.background`, `.overlay.open`, `.overlay.close`, `.overlay.resize`,
   `.overlay.reload`, `.overlay.navigate`,
@@ -314,6 +314,14 @@ side, and reads `lastAppliedIsDark` when bare. Refuse it outside XCUITest; provi
   value, which is shared with `session.scratch`/`sidebar` and cannot express close (a hidden split is
   already `off`). Idempotent: a session with no right pane answers ok. The palette's Close Split is the
   GUI twin, a row gated on `hasSplit` with no `BuiltinAction`.
+- `session.split.command` stores `Session.newSplitCommand`, which `AppStore.setSplitVisibility` copies into
+  `splitInitialCommand` only when it creates the split, so every creation path (⌘D, menu, control) honours
+  it and a re-show does not. `session.split --command` overrides it for one creation and is refused
+  against an existing split, whose shell it would never reach. A nil never clears the slot, because
+  `zmx attach` fills it before showing the split. No GUI twin: the caller is a script that owns the tab.
+  `LaunchSeed` gates on `Session.paneWasRestored(_:)`, never the session-wide `wasRestored`: a split created
+  after launch in a restored session is a runtime pane, and the session-wide flag silently withheld its
+  command outside rerun mode.
 - `session.swap` exchanges the two terminals' physical positions and primary/split roles. Require
   `hasSplit`, not `isSplit`, so hidden splits work; briefly poll a missing surface slot, then return
   `session not realized`. Focus follows the terminal, while axis and ratio stay with the layout. Pane

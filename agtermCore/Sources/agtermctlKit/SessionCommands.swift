@@ -226,7 +226,7 @@ struct Session: ParsableCommand {
     struct Split: ParsableCommand {
         static let configuration = CommandConfiguration(
             abstract: "Show, hide, or close a session split.",
-            subcommands: [Visibility.self, Close.self],
+            subcommands: [Visibility.self, Close.self, NewSplitCommand.self],
             defaultSubcommand: Visibility.self
         )
 
@@ -237,6 +237,10 @@ struct Session: ParsableCommand {
                                                            abstract: "Show or hide a session split (on|off|toggle).")
             @Argument(help: "Mode: on (show), off (hide), or toggle (default). Hidden panes stay alive.") var mode: String = "toggle"
             @Option(name: .long, help: "Divider direction: vertical (left/right) or horizontal (top/bottom).") var axis: String?
+            @Option(name: .long, help: """
+                Run this in the split this call creates, instead of the session's split command or a login \
+                shell. Refused when the split already exists.
+                """) var command: String?
             @OptionGroup var target: TargetOptions
             @OptionGroup var options: ClientOptions
             @OptionGroup var operation: OperationOptions
@@ -245,11 +249,42 @@ struct Session: ParsableCommand {
                 if let axis, SplitAxis(rawValue: axis) == nil {
                     throw ValidationError("--axis must be vertical or horizontal")
                 }
+                if command != nil, mode == "off" {
+                    throw ValidationError("--command needs a mode that shows the split (on or toggle)")
+                }
             }
 
             func makeRequest() throws -> ControlRequest {
                 operation.stamp(ControlRequest(cmd: .sessionSplit, target: target.target,
-                                               args: options.withWindow(ControlArgs(mode: mode, axis: axis))))
+                                               args: options.withWindow(ControlArgs(mode: mode, axis: axis, command: command))))
+            }
+        }
+
+        /// Not `Command`, which would shadow agtermCore's protocol enum; `commandName` keeps the verb.
+        struct NewSplitCommand: RequestCommand {
+            static let configuration = CommandConfiguration(
+                commandName: "command",
+                abstract: "Set what every newly created split of the session runs (or --clear for a login shell).",
+                discussion: """
+                    Applies when a split is created, by ⌘D or `session split`; showing a hidden split runs \
+                    nothing new. COMMAND is libghostty's command, split into argv rather than run by a shell, \
+                    so operators need an explicit `sh -c`. Persisted with the session and read back on \
+                    `tree` as newSplitCommand.
+                    """)
+            @Argument(help: "The command a new split runs (omit with --clear).") var command: String?
+            @Flag(name: .long, help: "Drop the command, so a new split is a login shell again.") var clear = false
+            @OptionGroup var target: TargetOptions
+            @OptionGroup var options: ClientOptions
+
+            func validate() throws {
+                guard (command != nil) != clear else {
+                    throw ValidationError("provide exactly one of a COMMAND or --clear")
+                }
+            }
+
+            func makeRequest() throws -> ControlRequest {
+                ControlRequest(cmd: .sessionSplitCommand, target: target.target,
+                               args: options.withWindow(ControlArgs(mode: clear ? "clear" : "set", command: command)))
             }
         }
 

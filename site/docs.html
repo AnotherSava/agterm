@@ -666,6 +666,7 @@ agtermctl session overlay open --html report.html --page</code></pre>
 <li><strong>Close Split</strong> in the action palette ends the second pane, whatever it is running.</li>
 <li>When the first pane's shell exits, the second pane takes its place and the session stays. In Live mode that includes a split still hidden since a relaunch, while its program runs.</li>
 <li><strong>Swap Panes</strong> (View or the action palette) exchanges the two terminals without restarting them. The primary and split roles follow the positions, focus follows its terminal, and the divider stays put. <code>agtermctl session swap</code> does the same, also while the split is hidden.</li>
+<li>A script that owns a session can make its new splits run something other than a shell with <code>agtermctl session split command</code>, so ⌘D in an ssh tab opens a second connection to the same host.</li>
 </ul>
 <h3 id="terminals-quick">Quick terminal</h3>
 <p>One throwaway shell for the whole app, tied to no session or window.</p>

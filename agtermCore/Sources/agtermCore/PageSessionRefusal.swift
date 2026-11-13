@@ -4,7 +4,8 @@ public enum PageSessionRefusal {
     // a page session's page is the row: these act on a terminal, or would cover or float the page
     private static let refused: Set<Command> = [
         .sessionType, .sessionText, .sessionCopy, .sessionPaste, .sessionPasteText, .sessionSelectAll, .sessionSearch, .sessionBackground,
-        .sessionLead, .sessionSwap, .sessionFocus, .sessionResize, .sessionSplit, .sessionSplitClose, .sessionScratch,
+        .sessionLead, .sessionSwap, .sessionFocus, .sessionResize, .sessionSplit, .sessionSplitClose, .sessionSplitCommand,
+        .sessionScratch,
         .sessionRestart, .sessionRestore, .sessionOverlayOpen, .sessionHudOpen,
     ]
 

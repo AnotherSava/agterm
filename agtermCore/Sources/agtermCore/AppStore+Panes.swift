@@ -57,8 +57,9 @@ extension AppStore {
 
     /// Toggles the one-level split. With no axis this is the legacy preserve-axis hide/show operation. With
     /// an axis it is the axis-specific UI command: the same shown axis hides, another shown axis transposes,
-    /// and a hidden or absent split is shown in the requested arrangement.
-    public func toggleSplit(_ sessionID: UUID, axis: SplitAxis? = nil, focusesNewSplit: Bool = true) {
+    /// and a hidden or absent split is shown in the requested arrangement. `command` is what a split created
+    /// here runs, overriding `newSplitCommand`.
+    public func toggleSplit(_ sessionID: UUID, axis: SplitAxis? = nil, focusesNewSplit: Bool = true, command: String? = nil) {
         guard let session = session(withID: sessionID) else { return }
         let show: Bool
         if let axis {
@@ -67,19 +68,30 @@ extension AppStore {
         } else {
             show = !session.isSplit
         }
-        setSplitVisibility(session, shown: show, focusesNewSplit: focusesNewSplit)
+        setSplitVisibility(session, shown: show, focusesNewSplit: focusesNewSplit, command: command)
     }
 
     /// Idempotently shows or hides a split, optionally selecting its arrangement when showing. Hiding never
     /// changes the stored axis, so generic hide/show and a later same-axis command preserve the layout.
     /// `focusesNewSplit` false keeps a new split's primary focused, for a split another Mac asked for.
-    public func setSplitVisibility(_ sessionID: UUID, shown: Bool, axis: SplitAxis? = nil, focusesNewSplit: Bool = true) {
+    public func setSplitVisibility(_ sessionID: UUID, shown: Bool, axis: SplitAxis? = nil, focusesNewSplit: Bool = true,
+                                   command: String? = nil) {
         guard let session = session(withID: sessionID) else { return }
         if shown, let axis { session.splitAxis = axis }
-        setSplitVisibility(session, shown: shown, focusesNewSplit: focusesNewSplit)
+        setSplitVisibility(session, shown: shown, focusesNewSplit: focusesNewSplit, command: command)
     }
 
-    private func setSplitVisibility(_ session: Session, shown: Bool, focusesNewSplit: Bool = true) {
+    /// Stores the command every newly created split of the session runs; nil restores a plain shell.
+    /// Returns false for an unknown id.
+    @discardableResult
+    public func setNewSplitCommand(_ command: String?, forSession id: UUID) -> Bool {
+        guard let session = session(withID: id) else { return false }
+        session.newSplitCommand = command
+        save()
+        return true
+    }
+
+    private func setSplitVisibility(_ session: Session, shown: Bool, focusesNewSplit: Bool = true, command: String? = nil) {
         let wasShown = session.isSplit
         // hiding a shown split unmounts its right host, so the pacer must stop expecting that key
         if !shown, session.isSplit, let split = session.splitPaneIdentity { launchPaneDrop?([split]) }
@@ -95,6 +107,9 @@ extension AppStore {
                 // Every split-creating path must mint this identity before exposing the pane.
                 session.splitPaneIdentity = UUID()
                 session.splitFocused = focusesNewSplit
+                session.splitWasRestored = false
+                // nil leaves the slot alone: `zmx attach` fills it before showing the split
+                if let command = command ?? session.newSplitCommand { session.splitInitialCommand = command }
             }
         }
         // hiding the split un-renders a pane, so an overlay opened on it that has not realized yet would sit

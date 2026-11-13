@@ -282,7 +282,8 @@ other program),
 `restoreCommand`/`splitRestoreCommand` (each pane's persisted restore-command override — the read side of
 `session restore`: omitted = no override (auto-capture), `""` = pinned to nothing (a plain shell), a
 command string = the shell line that runs on the next launch; reported from persisted state, so a read
-after the override already fired still reports what is pinned), `background` (the
+after the override already fired still reports what is pinned), `newSplitCommand` (what a newly created
+split runs, the read side of `session split command`; omitted when a new split is a login shell), `background` (the
 background spec set via `session background` — a `{kind, text?, imagePath?, colorHex?, opacity?, fit?,
 position?, repeats?}` object; `kind` is `image`/`text`/`color` — omitted when none is set),
 `paneBackgrounds` (the per-pane overrides set via `session background --pane`, a `{left?, right?,
@@ -815,12 +816,21 @@ error keeps those names for compatibility.
   matches) and `result.text` (the counter string: "N of M", "M matches", or "no matches"); the count
   settles asynchronously, so the command waits briefly for it. Without `--json` it prints `result.text`
   (or `ok` on close / an empty bar).
-- `session split [on|off|toggle] [--axis vertical|horizontal] [--target] [--window W]` - second shell.
+- `session split [on|off|toggle] [--axis vertical|horizontal] [--command CMD] [--target] [--window W]` - second shell.
   `vertical` means left/right and `horizontal` means top/bottom. Omitting `--axis` preserves the current
   axis and keeps the legacy left/right default for a new split. `off` hides but keeps the shell alive;
   tearing it down takes `session split close` or the shell's own exit. Unknown modes and axes error.
   On a session attached from another host, `split` and `split close` run on that host, and a split it opens
   attaches here.
+  `--command` runs CMD in the split this call creates, overriding `session split command`; it errors when
+  the split already exists, hidden included.
+- `session split command (CMD | --clear) [--target] [--window W]` - store what every NEWLY created split of
+  the session runs instead of a login shell, whether ⌘D, the menu or `session split` creates it; re-showing
+  a hidden split runs nothing new. CMD is libghostty's command, split into argv rather than run by a
+  shell, so operators need `sh -c`; the split closes when it exits. Persisted, and read back on `tree`
+  as `newSplitCommand`. Refused on a session attached from another host or in a remote window, whose
+  splits run on that host. Typical use: a script that opens an ssh tab sets the same `ssh -t host …` so ⌘D
+  opens a second connection there.
 - `session split close [--target] [--window W]` — tear the split pane down: the surface dies, whatever it
   runs dies with it, and `hasSplit`/`splitRatio`/`splitFocused` drop out of `tree`. Reaches a HIDDEN pane
   too, which is what `session type --pane right $'exit\n'` cannot do once the pane is past a prompt

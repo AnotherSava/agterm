@@ -292,6 +292,18 @@ public extension ControlActions {
         splitSession(target, window: window, mode: mode)
     }
 
+    func splitSession(_ target: String?, window: String?, mode: String?, axis: SplitAxis?,
+                      command: String?) -> ControlResponse {
+        guard command == nil else {
+            return ControlResponse(ok: false, error: ControlActionsUnsupported.message("session.split --command"))
+        }
+        return splitSession(target, window: window, mode: mode, axis: axis)
+    }
+
+    func setSessionNewSplitCommand(_: String?, window _: String?, command _: String?) -> ControlResponse {
+        ControlResponse(ok: false, error: ControlActionsUnsupported.message("session.split.command"))
+    }
+
     func scratchSession(_ target: String?, window: String?, mode: String?, command: String?,
                         follow _: Bool) -> ControlResponse {
         scratchSession(target, window: window, mode: mode, command: command)

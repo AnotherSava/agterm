@@ -205,6 +205,17 @@ final class SurfaceFactorySeedTests: XCTestCase {
                        LaunchSeed(command: "echo split", initialInput: nil, waitAfterCommand: false))
     }
 
+    func testASplitCreatedAfterLaunchInARestoredSessionRunsItsCommand() throws {
+        let session = try XCTUnwrap(store.addSession(toWorkspace: store.addWorkspace(name: "w").id, cwd: "/tmp"))
+        session.wasRestored = true
+        session.newSplitCommand = "ssh -t box"
+
+        store.toggleSplit(session.id)
+
+        XCTAssertEqual(splitSurface(for: session).resolveLaunchSeed(),
+                       LaunchSeed(command: "ssh -t box", initialInput: nil, waitAfterCommand: false))
+    }
+
     /// Arming expects every restored primary and shown right pane, before any provider exists to say which
     /// of them replays a program. A pane that turns out to replay nothing must leave the queue at
     /// construction, or the drain waits forever on a permit it never asks for.
@@ -531,6 +542,7 @@ final class SurfaceFactorySeedTests: XCTestCase {
     private func restoredSession() -> Session {
         let session = Session(initialCwd: "/tmp")
         session.wasRestored = true
+        session.splitWasRestored = true
         return session
     }
 

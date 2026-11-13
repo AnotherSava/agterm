@@ -248,10 +248,24 @@ public final class Session: Identifiable {
     /// The split pane's hold-after-exit policy, meaningful only with `splitInitialCommand`.
     @ObservationIgnored public var splitCommandWait: Bool = false
 
+    /// The command every NEWLY created split runs (`session.split.command`), copied into
+    /// `splitInitialCommand` at creation; re-showing a hidden split runs nothing new. Session-scoped, so a swap
+    /// leaves it in place. Persisted: a Live relaunch re-attaches a tab without re-running whatever set it.
+    @ObservationIgnored public var newSplitCommand: String?
+
     /// True when the session was rebuilt by `AppStore.restore(from:)` rather than freshly created; gates the
     /// `initialCommand` re-run on `rerun` launch mode (a fresh session always runs it, a restored one gets
     /// a plain shell in any other mode). Never persisted.
     @ObservationIgnored public var wasRestored = false
+
+    /// `wasRestored` for the split pane: false for a split created after launch, which is a runtime pane
+    /// even in a restored session and so runs its creation command. Never persisted.
+    @ObservationIgnored public var splitWasRestored = false
+
+    /// Whether `pane` came from a restore rather than being created this run.
+    public func paneWasRestored(_ pane: StatusPane) -> Bool {
+        pane == .right ? splitWasRestored : wasRestored
+    }
 
     /// The main pane's foreground command (full argv) for restore-running-command, read once by the surface
     /// factory on a launch restore, then cleared. Persisted; nil at a prompt. Capture sites and the

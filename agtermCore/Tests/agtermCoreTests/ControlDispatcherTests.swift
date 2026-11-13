@@ -676,6 +676,56 @@ struct ControlDispatcherTests {
         ])
     }
 
+    @Test func splitCommandRoutesSetClearAndCreatingSplit() async {
+        let actions = MockControlActions()
+        let dispatcher = ControlDispatcher(actions: actions)
+
+        let set = await dispatcher.dispatch(ControlRequest(
+            cmd: .sessionSplitCommand, target: "session", args: ControlArgs(mode: "set", command: "ssh -t box", window: "win")
+        ))
+        let clear = await dispatcher.dispatch(ControlRequest(
+            cmd: .sessionSplitCommand, target: "session", args: ControlArgs(mode: "clear")
+        ))
+        let split = await dispatcher.dispatch(ControlRequest(
+            cmd: .sessionSplit, target: "session", args: ControlArgs(mode: "on", command: "htop")
+        ))
+
+        #expect(set == ControlResponse(ok: true))
+        #expect(clear == ControlResponse(ok: true))
+        #expect(split == ControlResponse(ok: true))
+        #expect(actions.calls == [
+            .sessionNewSplitCommand(target: "session", window: "win", command: "ssh -t box"),
+            .sessionNewSplitCommand(target: "session", window: nil, command: nil),
+            .sessionSplitWithCommand(target: "session", window: nil, "on", command: "htop")
+        ])
+    }
+
+    @Test(arguments: [
+        ControlArgs(mode: "set"),
+        ControlArgs(mode: "set", command: "  "),
+        ControlArgs(mode: "set", command: "ssh\nrm"),
+        ControlArgs(mode: "set", command: String(repeating: "a", count: ControlRestoreOverride.maxCommandBytes + 1)),
+        ControlArgs(mode: "replace", command: "ssh"),
+        ControlArgs(command: "ssh")
+    ])
+    func splitCommandRejectsBadInputBeforeTheHost(args: ControlArgs) async {
+        let actions = MockControlActions()
+        let response = await ControlDispatcher(actions: actions).dispatch(ControlRequest(cmd: .sessionSplitCommand, args: args))
+
+        #expect(response?.ok == false)
+        #expect(actions.calls.isEmpty)
+    }
+
+    @Test func splitRejectsAControlCharacterCommandBeforeTheHost() async {
+        let actions = MockControlActions()
+        let response = await ControlDispatcher(actions: actions).dispatch(ControlRequest(
+            cmd: .sessionSplit, args: ControlArgs(mode: "on", command: "a\u{1b}b")
+        ))
+
+        #expect(response?.ok == false)
+        #expect(actions.calls.isEmpty)
+    }
+
     @Test func sessionSwapRoutesTargetAndWindow() async {
         let actions = MockControlActions()
         actions.nextSessionSwapResponse = ControlResponse(ok: true, result: ControlResult(id: "session-id"))

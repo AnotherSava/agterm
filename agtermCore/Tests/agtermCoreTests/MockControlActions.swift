@@ -54,6 +54,8 @@ final class MockControlActions: ControlActions {
         case sessionRestart(target: String?, window: String?, ControlSessionRestartOptions)
         case sessionSplit(target: String?, window: String?, String?, SplitAxis?)
         case sessionSplitClose(target: String?, window: String?)
+        case sessionSplitWithCommand(target: String?, window: String?, String?, command: String)
+        case sessionNewSplitCommand(target: String?, window: String?, command: String?)
         case sessionSwap(target: String?, window: String?)
         case sessionLead(target: String?, window: String?, pane: StatusPane?)
         case sessionScratch(target: String?, window: String?, String?, command: String?, follow: Bool)
@@ -478,6 +480,18 @@ final class MockControlActions: ControlActions {
 
     func splitSession(_ target: String?, window: String?, mode: String?, axis: SplitAxis?) -> ControlResponse {
         calls.append(.sessionSplit(target: target, window: window, mode, axis))
+        return ControlResponse(ok: true)
+    }
+
+    func splitSession(_ target: String?, window: String?, mode: String?, axis: SplitAxis?,
+                      command: String?) -> ControlResponse {
+        guard let command else { return splitSession(target, window: window, mode: mode, axis: axis) }
+        calls.append(.sessionSplitWithCommand(target: target, window: window, mode, command: command))
+        return ControlResponse(ok: true)
+    }
+
+    func setSessionNewSplitCommand(_ target: String?, window: String?, command: String?) -> ControlResponse {
+        calls.append(.sessionNewSplitCommand(target: target, window: window, command: command))
         return ControlResponse(ok: true)
     }
 

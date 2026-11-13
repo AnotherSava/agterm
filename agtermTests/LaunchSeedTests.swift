@@ -265,6 +265,7 @@ final class LaunchSeedTests: XCTestCase {
     private func restoredSession() -> Session {
         let session = Session(initialCwd: "/tmp")
         session.wasRestored = true
+        session.splitWasRestored = true
         return session
     }
 

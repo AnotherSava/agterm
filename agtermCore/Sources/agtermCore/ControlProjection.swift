@@ -314,6 +314,9 @@ public struct ControlSessionNode: Codable, Sendable, Equatable {
     /// The split (right) pane's persisted restore-command override, the split analogue of `restoreCommand`
     /// (the read side of `session.restore --pane right`).
     public let splitRestoreCommand: String?
+    /// The command a newly created split runs, the read side of `session.split.command`; omitted when a new
+    /// split is a plain shell.
+    public let newSplitCommand: String?
     /// The session's agent status (`active`/`completed`/`blocked`) as the `AgentStatus` raw value;
     /// nil/omitted when idle. The read side of `session.status`.
     public let status: String?
@@ -445,7 +448,9 @@ public struct ControlSessionNode: Codable, Sendable, Equatable {
                 remoteOverlays: [ControlRemoteOverlayNode]? = nil, htmlOverlays: [ControlHtmlOverlayNode]? = nil,
                 hiddenOverlays: [String]? = nil, lastSelectedAt: Double? = nil,
                 tint: String? = nil, tintOn: [String]? = nil, parent: String? = nil, collapsed: Bool? = nil,
-                content: String? = nil, info: SessionInfo? = nil, remoteSessionID: String? = nil, followsCompanions: Bool? = nil) {
+                content: String? = nil, info: SessionInfo? = nil, remoteSessionID: String? = nil, followsCompanions: Bool? = nil,
+                newSplitCommand: String? = nil) {
+        self.newSplitCommand = newSplitCommand
         self.remoteSessionID = remoteSessionID
         self.followsCompanions = followsCompanions
         self.content = content

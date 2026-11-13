@@ -30,7 +30,7 @@ public struct ControlDispatcher {
             return dispatchTint(request)
         case .sessionRestart:
             return await dispatchSessionRestart(request)
-        case .sessionSplit, .sessionSplitClose, .sessionSwap, .sessionLead, .sessionScratch, .sessionFocus,
+        case .sessionSplit, .sessionSplitClose, .sessionSplitCommand, .sessionSwap, .sessionLead, .sessionScratch, .sessionFocus,
                 .sessionResize, .surfaceZoom, .surfaceCursor, .sessionType,
                 .sessionCopy, .sessionPaste, .sessionPasteText, .sessionSelectAll, .sessionSearch, .sessionOverlayOpen,
                 .sessionOverlayClose, .sessionOverlayResize, .sessionOverlayReload, .sessionOverlayNavigate,
@@ -391,10 +391,15 @@ public struct ControlDispatcher {
             } else {
                 axis = nil
             }
+            if let command = request.args?.command, let rejection = Self.splitCommandRejection(command) {
+                return rejection
+            }
             return actions.splitSession(request.target, window: request.args?.window,
-                                        mode: request.args?.mode, axis: axis)
+                                        mode: request.args?.mode, axis: axis, command: request.args?.command)
         case .sessionSplitClose:
             return actions.closeSessionSplit(request.target, window: request.args?.window)
+        case .sessionSplitCommand:
+            return dispatchSplitCommand(request)
         case .sessionSwap:
             return await actions.swapSessionPanes(request.target, window: request.args?.window)
         case .sessionLead:

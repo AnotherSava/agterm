@@ -204,6 +204,8 @@ public struct SessionSnapshot: Codable, Equatable, Sendable {
     public var splitInitialCommand: String?
     /// Whether the split pane's creation command holds after exit. nil (missing key) decodes as false.
     public var splitCommandWait: Bool?
+    /// The command a newly created split runs (`Session.newSplitCommand`).
+    public var newSplitCommand: String?
     /// The session's background watermark (image or rasterized text); nil = none. `.text` re-renders its PNG.
     public var backgroundWatermark: BackgroundWatermark?
     /// paneBackgrounds holds the left/right overrides of `backgroundWatermark`; the scratch's is never persisted.
@@ -241,8 +243,10 @@ public struct SessionSnapshot: Codable, Equatable, Sendable {
                 restoreCommand: String? = nil, splitRestoreCommand: String? = nil,
                 context: String? = nil, lastSelectedAt: Double? = nil, tint: SidebarTint? = nil,
                 parentID: UUID? = nil, collapsed: Bool? = nil, page: PageSnapshot? = nil, ended: Bool? = nil,
-                scratchPaneIdentity: UUID? = nil, leads: [UUID: String]? = nil) {
+                scratchPaneIdentity: UUID? = nil, leads: [UUID: String]? = nil,
+                newSplitCommand: String? = nil) {
         self.id = id
+        self.newSplitCommand = newSplitCommand
         self.leads = leads
         self.scratchPaneIdentity = scratchPaneIdentity
         self.page = page
@@ -282,6 +286,7 @@ public struct SessionSnapshot: Codable, Equatable, Sendable {
         case splitInitialCommand, splitCommandWait, backgroundWatermark, paneBackgrounds
         case restoreCommand, splitRestoreCommand, context, lastSelectedAt, tint, parentID, collapsed, page, ended
         case scratchPaneIdentity, leads
+        case newSplitCommand
     }
 
     /// Custom decode so every optional is LOSSY, matching `Snapshot.init(from:)`: an unknown
@@ -311,6 +316,7 @@ public struct SessionSnapshot: Codable, Equatable, Sendable {
         commandWait = (try? c.decodeIfPresent(Bool.self, forKey: .commandWait)) ?? nil
         splitInitialCommand = (try? c.decodeIfPresent(String.self, forKey: .splitInitialCommand)) ?? nil
         splitCommandWait = (try? c.decodeIfPresent(Bool.self, forKey: .splitCommandWait)) ?? nil
+        newSplitCommand = (try? c.decodeIfPresent(String.self, forKey: .newSplitCommand)) ?? nil
         backgroundWatermark = (try? c.decodeIfPresent(BackgroundWatermark.self, forKey: .backgroundWatermark)) ?? nil
         paneBackgrounds = (try? c.decodeIfPresent(PaneBackgrounds.self, forKey: .paneBackgrounds)) ?? nil
         restoreCommand = (try? c.decodeIfPresent(String.self, forKey: .restoreCommand)) ?? nil
