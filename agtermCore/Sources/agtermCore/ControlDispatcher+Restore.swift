@@ -20,13 +20,8 @@ extension ControlDispatcher {
             guard let command = args?.command else {
                 return .failure(ArgumentRejection(message: "session.restore set requires a command"))
             }
-            // a control character would smuggle an extra line (or an escape sequence) into the shell the
-            // override is typed into, so the whole class is rejected — tab included.
-            guard !CommandRestore.hasControlCharacter(command) else {
-                return .failure(ArgumentRejection(message: "command must not contain control characters"))
-            }
-            guard command.utf8.count <= ControlRestoreOverride.maxCommandBytes else {
-                return .failure(ArgumentRejection(message: "command too long (max \(ControlRestoreOverride.maxCommandBytes) bytes)"))
+            if let rejection = Self.commandRejection(command, maxBytes: ControlRestoreOverride.maxCommandBytes) {
+                return .failure(rejection)
             }
             pin = .pin(command)
         case "none":
@@ -80,14 +75,9 @@ extension ControlDispatcher {
     static func restartOptions(_ args: ControlArgs?) -> Result<ControlSessionRestartOptions, ArgumentRejection> {
         let command = args?.command
         if let command {
-            guard !command.trimmingCharacters(in: .whitespaces).isEmpty else {
-                return .failure(ArgumentRejection(message: "session.restart takes a non-empty command, or none to replay"))
-            }
-            guard !CommandRestore.hasControlCharacter(command) else {
-                return .failure(ArgumentRejection(message: "command must not contain control characters"))
-            }
-            guard command.utf8.count <= ControlSessionRestartOptions.maxCommandBytes else {
-                return .failure(ArgumentRejection(message: "command too long (max \(ControlSessionRestartOptions.maxCommandBytes) bytes)"))
+            if let rejection = Self.commandRejection(command, maxBytes: ControlSessionRestartOptions.maxCommandBytes,
+                                                     emptyError: "session.restart takes a non-empty command, or none to replay") {
+                return .failure(rejection)
             }
         }
         var pane: StatusPane?
@@ -103,6 +93,22 @@ extension ControlDispatcher {
             return .failure(ArgumentRejection(message: "session.restart requires --pane-id or --pane"))
         }
         return .success(ControlSessionRestartOptions(command: command, pane: pane, paneID: paneID))
+    }
+
+    /// The one validation every command line a caller stores or has typed goes through. The line is never
+    /// rewritten; a control character would smuggle an extra line (or an escape sequence) into the shell it
+    /// is typed into, so the whole class is rejected, tab included. A nil `emptyError` accepts a blank line.
+    static func commandRejection(_ command: String, maxBytes: Int, emptyError: String? = nil) -> ArgumentRejection? {
+        if let emptyError, command.trimmingCharacters(in: .whitespaces).isEmpty {
+            return ArgumentRejection(message: emptyError)
+        }
+        if CommandRestore.hasControlCharacter(command) {
+            return ArgumentRejection(message: "command must not contain control characters")
+        }
+        if command.utf8.count > maxBytes {
+            return ArgumentRejection(message: "command too long (max \(maxBytes) bytes)")
+        }
+        return nil
     }
 }
 

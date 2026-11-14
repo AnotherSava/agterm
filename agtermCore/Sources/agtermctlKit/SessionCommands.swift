@@ -225,7 +225,7 @@ struct Session: ParsableCommand {
 
     struct Split: ParsableCommand {
         static let configuration = CommandConfiguration(
-            abstract: "Show, hide, or close a session split.",
+            abstract: "Show, hide, or close a session split, or set the command new splits run.",
             subcommands: [Visibility.self, Close.self, NewSplitCommand.self],
             defaultSubcommand: Visibility.self
         )

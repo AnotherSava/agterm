@@ -358,9 +358,8 @@ extension ControlServer: ControlActions {
     }
 
     /// splitSession with `focus` false leaves first responder and a new split's pane focus alone, for a split
-    /// another Mac asked for.
-    /// `command` is refused once the split exists: showing a hidden split keeps its shell, so the command
-    /// would silently never run.
+    /// another Mac asked for. `command` is refused once the split exists: showing a hidden split keeps its
+    /// shell, so the command would silently never run.
     func splitSession(_ target: String?, window: String?, mode: String?, axis: SplitAxis?, focus: Bool,
                       command: String? = nil) -> ControlResponse {
         return resolver.resolveSession(target, window: window) { store, id in
@@ -370,13 +369,8 @@ extension ControlServer: ControlActions {
             guard let parsedMode = ControlToggleMode.parse(mode) else {
                 return ControlResponse(ok: false, error: "invalid split mode: \(mode ?? "toggle")")
             }
-            if command != nil {
-                guard parsedMode != .off else {
-                    return ControlResponse(ok: false, error: "--command needs a mode that shows the split (on or toggle)")
-                }
-                guard !session.hasSplit else {
-                    return ControlResponse(ok: false, error: "split already exists; --command applies only when one is created")
-                }
+            if command != nil, session.hasSplit {
+                return ControlResponse(ok: false, error: "split already exists; --command applies only when one is created")
             }
             switch parsedMode {
             case .on:

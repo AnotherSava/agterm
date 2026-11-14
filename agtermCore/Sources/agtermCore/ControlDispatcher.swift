@@ -391,8 +391,12 @@ public struct ControlDispatcher {
             } else {
                 axis = nil
             }
-            if let command = request.args?.command, let rejection = Self.splitCommandRejection(command) {
-                return rejection
+            if let command = request.args?.command {
+                if let rejection = Self.splitCommandRejection(command) { return rejection }
+                // hiding never creates a split, so the command would be dropped with an ok.
+                if ControlToggleMode.parse(request.args?.mode) == .off {
+                    return ControlResponse(ok: false, error: "--command needs a mode that shows the split (on or toggle)")
+                }
             }
             return actions.splitSession(request.target, window: request.args?.window,
                                         mode: request.args?.mode, axis: axis, command: request.args?.command)

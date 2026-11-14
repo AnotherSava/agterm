@@ -716,11 +716,10 @@ struct ControlDispatcherTests {
         #expect(actions.calls.isEmpty)
     }
 
-    @Test func splitRejectsAControlCharacterCommandBeforeTheHost() async {
+    @Test(arguments: [ControlArgs(mode: "on", command: "a\u{1b}b"), ControlArgs(mode: "off", command: "htop")])
+    func splitRejectsABadCommandBeforeTheHost(args: ControlArgs) async {
         let actions = MockControlActions()
-        let response = await ControlDispatcher(actions: actions).dispatch(ControlRequest(
-            cmd: .sessionSplit, args: ControlArgs(mode: "on", command: "a\u{1b}b")
-        ))
+        let response = await ControlDispatcher(actions: actions).dispatch(ControlRequest(cmd: .sessionSplit, args: args))
 
         #expect(response?.ok == false)
         #expect(actions.calls.isEmpty)

@@ -1405,7 +1405,7 @@ error keeps those names for compatibility.
   and the strip has no hide button. Terminal commands and anything that would cover, float or replace the
   page are refused with `<cmd>: not available on a page session`: `session.type`, `.text`, `.copy`,
   `.paste`, `.selectall`, `.search`, `.background`, `.lead`, `.swap`, `.focus`, `.resize`, `.split`,
-  `.split.close`, `.scratch`, `.restart`, `.restore`, `session.overlay.open`, `session.hud.open`, a floating
+  `.split.close`, `.split.command`, `.scratch`, `.restart`, `.restore`, `session.overlay.open`, `session.hud.open`, a floating
   `session.overlay.resize`, a terminal-style `ask.open` (the default), and `surface.zoom`/`surface.cursor` aimed at
   the page explicitly. Close, rename, flag, tint, status, notify, and the page's own reload, navigate,
   result and submit keep working. The dashboard leaves page sessions out. Read back from the tree node's
