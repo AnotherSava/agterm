@@ -46,8 +46,11 @@ upstream's `.DS_Store` line, which is covered by this machine's global excludes 
 contributor on another machine has, so that removal is only ever correct inside this fork.
 
 **The daily driver is a local Release build installed at `/Applications/agterm.app`.** The Homebrew
-cask is uninstalled. Catching that app up means `make deploy INSTALL_DIR=/Applications`: the project
-notes name `~/Applications` as the deploy target, which was right while the cask held `/Applications`
+cask is uninstalled. Catching that app up means `make deploy INSTALL_DIR=/Applications`, which the
+`deploy` skill runs here: the committed `config/deploy.env` names `DEPLOY_TYPE=make`, and the ignored
+`config/deploy.local.env` holds `INSTALL_DIR=/Applications`, so another clone needs that file written
+by hand or it installs to the Makefile's default, `~/Applications`. The project notes name that
+directory as the deploy target, which was right while the cask held `/Applications`
 and is wrong now, because a Release build carries upstream's own bundle identifier and two copies of
 it would contend for one state directory, one socket lock and one preferences domain. `agtermctl`
 reaches it from `/usr/local/bin`, installed through Help ▸ Install Command Line Tool rather than the
