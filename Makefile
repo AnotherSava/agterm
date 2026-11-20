@@ -28,6 +28,9 @@ release: ## release build, no launch (scripts/build.sh)
 	./scripts/build.sh
 
 deploy: release ## release build + copy to ~/Applications
+	@# Replacing zmx or agterm-session-host under a running daemon can SIGKILL it (Code Signature Invalid).
+	@! pgrep -fl "$(INSTALL_DIR)/agterm.app/Contents/MacOS/(zmx|agterm-session-host)" \
+	  || { echo "deploy: Live daemons run from the installed app; stop them first"; exit 1; }
 	rm -rf "$(INSTALL_DIR)/agterm.app"
 	cp -R "$(RELEASE_APP)" "$(INSTALL_DIR)/agterm.app"
 	@echo "installed $(INSTALL_DIR)/agterm.app"
