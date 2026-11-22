@@ -41,9 +41,9 @@ repo's own session on 2026-10-04; its user left the one-line fix for later, so t
 **Cut PR branches from `upstream/master`, never from this fork's master.** This fork's `.gitignore`
 differs from upstream's two ways, and a branch based on this master carries both into the diff. It
 carries re-include lines upstream does not have — for the conventions record, project memory, memos,
-`settings.json` and the commit gate, all of which `.claude/*` would otherwise hide. And it drops
-upstream's `.DS_Store` line, which is covered by this machine's global excludes but by nothing a
-contributor on another machine has, so that removal is only ever correct inside this fork.
+`settings.json`, the commit gate and `repo-flags`, all of which `.claude/*` would otherwise hide.
+And it drops upstream's `.DS_Store` line, which is covered by this machine's global excludes but by
+nothing a contributor on another machine has, so that removal is only ever correct inside this fork.
 
 **The daily driver is a local Release build installed at `/Applications/agterm.app`.** The Homebrew
 cask is uninstalled. Catching that app up means `make deploy INSTALL_DIR=/Applications`, which the

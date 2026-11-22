@@ -35,11 +35,12 @@ __pycache__/
 !.claude/
 .claude/*
 !.claude/rules/
-# fork-local: the conventions record, project memory, memos, settings and the commit gate live here
-# so they travel between machines.
+# fork-local: the conventions record, project memory, memos, settings, the commit gate and the repo flags
+# live here so they travel between machines.
 # Create PR branches from upstream/master, not from this fork's master, or these lines ride along.
 !.claude/memory/
 !.claude/memos/
 !.claude/conventions
 !.claude/settings.json
 !.claude/commit-checks.sh
+!.claude/repo-flags
