@@ -1,8 +1,8 @@
-diff --git ghostty-orig/src/Surface.zig ghostty/src/Surface.zig
-index adccc13..1dcf9f4 100644
---- ghostty-orig/src/Surface.zig
-+++ ghostty/src/Surface.zig
-@@ -2742,7 +2742,7 @@ pub fn keyCallback(
+diff --git a/src/Surface.zig b/src/Surface.zig
+index 3204643..69c7f42 100644
+--- a/src/Surface.zig
++++ b/src/Surface.zig
+@@ -2908,7 +2908,7 @@ pub fn keyCallback(
          // 1. mouse reporting is off
          // OR
          // 2. mouse reporting is on and we are not reporting shift to the terminal
@@ -11,7 +11,7 @@ index adccc13..1dcf9f4 100644
              (self.mouse.mods.shift and !self.mouseShiftCapture(false)))
          {
              // Refresh our link state
-@@ -2757,7 +2757,7 @@ pub fn keyCallback(
+@@ -2923,7 +2923,7 @@ pub fn keyCallback(
                  log.warn("failed to refresh links err={}", .{err});
                  break :mouse_mods;
              };
@@ -20,7 +20,7 @@ index adccc13..1dcf9f4 100644
              // If we have mouse reports on and we don't have shift pressed, we reset state
              _ = try self.rt_app.performAction(
                  .{ .surface = self },
-@@ -2777,7 +2777,7 @@ pub fn keyCallback(
+@@ -2943,7 +2943,7 @@ pub fn keyCallback(
      // needed, depending on the key state.
      if ((SurfaceMouse{
          .physical_key = event.key,
@@ -29,7 +29,7 @@ index adccc13..1dcf9f4 100644
          .mouse_shape = self.io.terminal.mouse_shape,
          .mods = self.mouse.mods,
          .over_link = self.mouse.over_link,
-@@ -3680,6 +3680,12 @@ fn isMouseReporting(self: *const Surface) bool {
+@@ -3846,6 +3846,12 @@ fn isMouseReporting(self: *const Surface) bool {
          self.io.terminal.flags.mouse_event != .none;
  }
  
@@ -42,7 +42,7 @@ index adccc13..1dcf9f4 100644
  pub fn mouseReportingActive(self: *Surface) bool {
      self.renderer_state.mutex.lockUncancelable(global.io());
      defer self.renderer_state.mutex.unlock(global.io());
-@@ -3785,7 +3791,7 @@ fn mouseShiftCapture(self: *const Surface, lock: bool) bool {
+@@ -3951,7 +3957,7 @@ fn mouseShiftCapture(self: *const Surface, lock: bool) bool {
  pub fn mouseCaptured(self: *Surface) bool {
      self.renderer_state.mutex.lockUncancelable(global.io());
      defer self.renderer_state.mutex.unlock(global.io());
@@ -51,7 +51,7 @@ index adccc13..1dcf9f4 100644
  }
  
  /// Called for mouse button press/release events. This will return true
-@@ -3934,7 +3940,7 @@ pub fn mouseButtonCallback(
+@@ -4100,7 +4106,7 @@ pub fn mouseButtonCallback(
      {
          self.renderer_state.mutex.lockUncancelable(global.io());
          defer self.renderer_state.mutex.unlock(global.io());
@@ -60,7 +60,7 @@ index adccc13..1dcf9f4 100644
              // If we have shift-pressed and we aren't allowed to capture it,
              // then we do not do a mouse report.
              if (mods.shift and !shift_capture) break :report;
-@@ -4399,7 +4405,7 @@ fn linkAtPin(
+@@ -4577,7 +4583,7 @@ fn linkAtPin(
  fn mouseModsWithCapture(self: *Surface, mods: input.Mods) input.Mods {
      // In any of these scenarios, whatever mods are set (even shift)
      // are preserved.
@@ -69,7 +69,7 @@ index adccc13..1dcf9f4 100644
      if (!mods.shift) return mods;
      if (self.mouseShiftCapture(false)) return mods;
  
-@@ -4631,7 +4637,7 @@ pub fn cursorPosCallback(
+@@ -4809,7 +4815,7 @@ pub fn cursorPosCallback(
      if ((over_link or
          self.mouse.link_point == null or
          (self.mouse.link_point != null and !self.mouse.link_point.?.eql(pos_vp))) and
@@ -78,7 +78,7 @@ index adccc13..1dcf9f4 100644
              (self.mouse.mods.shift and !self.mouseShiftCapture(false))))
      {
          // If we were previously over a link, we always update. We do this so that if the text
-@@ -4640,7 +4646,7 @@ pub fn cursorPosCallback(
+@@ -4818,7 +4824,7 @@ pub fn cursorPosCallback(
      }
  
      // Do a mouse report

@@ -30,6 +30,7 @@ struct ServerCommandPolicyTests {
         "the Mac app's own updater": [.updateCheck],
         "makes a Mac viewer": [.zmxAttach, .zmxAttachGroup, .sessionRemoteNew],
         "UI-test seam": [.debugAppearance],
+        "this fork's split command runs only in a Mac's local sessions": [.sessionSplitCommand],
         "deferred to docs/backlog/server-user-event-hooks.md": [.hooksList, .hooksReload],
     ]
 

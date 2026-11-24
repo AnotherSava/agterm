@@ -72,13 +72,21 @@ rather than in `CLAUDE.md` because that file is upstream's and an edit to it wou
 PR branch cut from this fork's master.
 
 **This fork carries a libghostty patch that upstream does not.** Upstream's
-`scripts/ghostty-patches/` holds its own `0001` (the teardown drain); the fork adds
-`0002-clicks-only-mouse-leaves-pointer.patch`, and the README there says what each changes. The
-digest in `.ghostty-build-stamp` covers both, so a stamp from an upstream-only build never matches this
-checkout's. The user chose the patch's wider scope on 2026-10-10 knowing its cost: no program that tracks only
-clicks (DECSET 1000 or X10, such as htop, mc, or Claude Code's fullscreen UI) receives mouse presses in
-this build. Keep `0002` out of PR branches cut from `upstream/master`, number it after upstream's patches,
-and re-apply it by hand whenever `GHOSTTY_REV` moves or upstream's patches change the same lines.
+`scripts/ghostty-patches/` holds its own numbered patches (`0001`–`0004` at v0.44.1); the fork adds
+`anothersava-0001-clicks-only-mouse-leaves-pointer.patch`, and the README there says what each
+changes. Fork patches carry their own `anothersava-NNNN` series, named after the fork owner and chosen
+by the user on 2026-11-24, so upstream adding a patch never renames them; the glob sorts them after
+upstream's. The digest in `.ghostty-build-stamp` covers
+all of them, so a stamp from an upstream-only build never matches this checkout's. The user chose the
+patch's wider scope on 2026-10-10 knowing its cost: no program that tracks only clicks (DECSET 1000 or
+X10, such as htop, mc, or Claude Code's fullscreen UI) receives mouse presses in this build. Keep it out
+of PR branches cut from `upstream/master`, and re-apply it by hand whenever `GHOSTTY_REV` moves or
+upstream's patches change the same lines.
+
+**`session split command` is fork-only and local-only.** The dotfiles remote-session `attach.sh` sets it
+so ⌘D in a remote tab opens a second ssh connection. Upstream (v0.43+) runs a remote or attached row's
+split on its host, which carries no split command, so the fork refuses it there
+(`splitCommandRemoteRefusal`) rather than letting it silently not run.
 
 **How to undo it.** The notarized cask bundle that was replaced is kept, signature intact, at
 `~/agterm-0.25.0-cask.app`, and the pre-switch state directory at

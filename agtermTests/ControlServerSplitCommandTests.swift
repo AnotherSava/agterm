@@ -75,4 +75,21 @@ final class ControlServerSplitCommandTests: XCTestCase {
         XCTAssertFalse(session.isSplit)
         XCTAssertEqual(session.splitInitialCommand, "htop")
     }
+
+    func testSplitCommandsAreRefusedOnARemoteRow() throws {
+        let store = try XCTUnwrap(library.activeStore)
+        let owner = try XCTUnwrap(store.currentWorkspaceID)
+        let row = try XCTUnwrap(store.addSession(toWorkspace: owner, cwd: NSHomeDirectory(), remoteHost: "buildbox"))
+        let requests = [
+            ControlRequest(cmd: .sessionSplitCommand, target: row.id.uuidString, args: ControlArgs(mode: "set", command: "htop")),
+            ControlRequest(cmd: .sessionSplit, target: row.id.uuidString, args: ControlArgs(mode: "on", command: "htop")),
+        ]
+        for request in requests {
+            guard case .refused(let response) = server.remoteRoute(request) else {
+                return XCTFail("\(request.cmd.rawValue) was not refused")
+            }
+            XCTAssertEqual(response.error, "split commands apply only to local sessions")
+        }
+        XCTAssertNil(row.newSplitCommand)
+    }
 }

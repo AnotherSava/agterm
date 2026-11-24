@@ -70,13 +70,13 @@ Remove the patch when `GHOSTTY_REV` lets the embedder add a link pattern, and ad
 
 ## Fork patches
 
-Patches named `fork-NNNN-*.patch` are carried by this fork only and stay out of PR branches cut from
+Patches named `anothersava-NNNN-*.patch` are carried by this fork only and stay out of PR branches cut from
 `upstream/master`. They sort after upstream's numbered patches, so upstream adding one never renames them,
 and each is generated against `GHOSTTY_REV` with every upstream patch applied.
 
-### fork-0001: clicks-only mouse leaves the pointer
+### anothersava-0001: clicks-only mouse leaves the pointer
 
-`fork-0001` gives the pointer back to the terminal while a program asks only for button presses (X10 or
+`anothersava-0001` gives the pointer back to the terminal while a program asks only for button presses (X10 or
 DECSET 1000), as Claude Code's fullscreen UI does. Such a program still receives the wheel, but ⌘-hover and
 ⌘-click reach links, plain drag selects, and presses are no longer reported to it, without holding Shift. A
 program tracking motion (1002 or 1003) keeps the mouse as upstream gives it. Upstream treats ⌘⇧ under any
