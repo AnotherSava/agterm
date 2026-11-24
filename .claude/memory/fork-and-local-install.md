@@ -9,15 +9,19 @@ This checkout is a fork, and the agterm running on this machine is built from it
 installed from Homebrew. Two things follow that neither the code nor git history records.
 
 **Remotes are inverted from the usual fork layout on purpose.** `origin` is the user's fork,
-`upstream` is `umputun/agterm`, and `master` tracks `upstream/master` — so `/pull` fast-forwards from
-umputun exactly as it did before the fork existed. `remote.pushDefault` is `origin`, so a bare
-`git push` reaches the fork and cannot reach upstream even by accident. Remotes are not committed, so
-a second clone of this fork starts with neither of them until they are added by hand, and behaves as
-a plain third-party clone until then.
+`upstream` is `umputun/agterm`, and `master` tracks `upstream/master`. `remote.pushDefault` is
+`origin`, so a bare `git push` reaches the fork and cannot reach upstream even by accident. Remotes
+are not committed, so a second clone of this fork starts with neither of them until they are added by
+hand, and behaves as a plain third-party clone until then.
 
-**Propose a pull only when upstream cuts a release tag, never for ordinary master commits.** Upstream
-moves most days, and every fast-forward puts the checkout further ahead of the build serving as the
-daily driver, which only a deliberate deploy replaces — so a pull per push buys churn rather than
+**The fork is integrated by rebasing its commits onto `upstream/master`, never by merge.** `master`
+carries fork commits on top of upstream, so it diverges as soon as upstream moves and neither `/pull`
+nor a bare `git pull` applies (with rebase unset, git refuses a divergent pull); catch up through
+`upstream-sync`.
+
+**Propose a sync only when upstream cuts a release tag, never for ordinary master commits.** Upstream
+moves most days, and every sync puts the checkout further ahead of the build serving as the
+daily driver, which only a deliberate deploy replaces — so a sync per push buys churn rather than
 currency. Compare the newest upstream tag against the checkout's own before raising it:
 
 ```bash
@@ -87,6 +91,12 @@ upstream's patches change the same lines.
 so ⌘D in a remote tab opens a second ssh connection. Upstream (v0.43+) runs a remote or attached row's
 split on its host, which carries no split command, so the fork refuses it there
 (`splitCommandRemoteRefusal`) rather than letting it silently not run.
+
+**Fork code goes in its own files.** Upstream keeps several files at their lint ceilings (at v0.44.1
+`Session.swift` was 999 of 1000 lines and `agtermctl`'s `Session` struct near its 800-line body limit),
+so any fork addition inside them fails strict lint. The split command's state sits behind one stored
+`Session.forkSplit` with its type in `Session+SplitCommand.swift`, and its CLI in
+`SessionCommands+SplitCommand.swift`; a sync then conflicts on one line instead of a block.
 
 **How to undo it.** The notarized cask bundle that was replaced is kept, signature intact, at
 `~/agterm-0.25.0-cask.app`, and the pre-switch state directory at
