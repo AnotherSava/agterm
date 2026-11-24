@@ -6,7 +6,7 @@ metadata:
 ---
 
 This checkout is a fork, and the agterm running on this machine is built from it rather than
-installed from Homebrew. Two things follow that neither the code nor git history records.
+installed from Homebrew. What follows is what neither the code nor git history records.
 
 **Remotes are inverted from the usual fork layout on purpose.** `origin` is the user's fork,
 `upstream` is `umputun/agterm`, and `master` tracks `upstream/master`. `remote.pushDefault` is
