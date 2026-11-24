@@ -826,9 +826,9 @@ error keeps those names for compatibility.
   the split already exists, hidden included.
 - `session split command (CMD | --clear) [--target] [--window W]` - store what every NEWLY created split of
   the session runs instead of a login shell, whether ⌘D, the menu or `session split` creates it; re-showing
-  a hidden split runs nothing new. CMD is libghostty's command, split into argv rather than run by a
-  shell, so operators need `sh -c`; the split closes when it exits. Persisted, and read back on `tree`
-  as `newSplitCommand`. Refused on a session attached from another host or in a remote window, whose
+  a hidden split runs nothing new. CMD runs as `session new --command` runs it (outside Live sessions a `;` or
+  `&&` list runs only its first command unless wrapped in `sh -c`); the split closes when it exits.
+  Persisted, and read back on `tree` as `newSplitCommand`. Refused on a session attached from another host or in a remote window, whose
   splits run on that host. Typical use: a script that opens an ssh tab sets the same `ssh -t host …` so ⌘D
   opens a second connection there.
 - `session split close [--target] [--window W]` — tear the split pane down: the surface dies, whatever it

@@ -10,8 +10,8 @@ extension Session.Split {
             abstract: "Set what every newly created split of the session runs (or --clear for a login shell).",
             discussion: """
                 Applies when a split is created, by ⌘D or `session split`; showing a hidden split runs \
-                nothing new. COMMAND is libghostty's command, split into argv rather than run by a shell, \
-                so operators need an explicit `sh -c`. Persisted with the session and read back on \
+                nothing new. COMMAND runs as `session new --command` runs it: outside Live sessions a `;` or `&&` \
+                list runs only its first command unless wrapped in `sh -c`. Persisted with the session and read back on \
                 `tree` as newSplitCommand.
                 """)
         @Argument(help: "The command a new split runs (omit with --clear).") var command: String?

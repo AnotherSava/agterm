@@ -1744,7 +1744,7 @@
               <p style="font-size: 15px; line-height: 1.65; color: #cbc6bc; margin: 10px 0 0">
                 Stores what every newly created split of the session runs instead of a login shell, whether ⌘D, the
                 menu or <span style="font-family: &quot;JetBrains Mono&quot;, monospace">session split</span> creates it; showing a hidden
-                split runs nothing new. CMD is libghostty's command, split into arguments rather than run by a shell,
+                split runs nothing new. CMD runs the way <span style="font-family: &quot;JetBrains Mono&quot;, monospace">session new --command</span> runs it,
                 and the split closes when it exits. A script that opens an ssh tab can set the same
                 <span style="font-family: &quot;JetBrains Mono&quot;, monospace">ssh -t host</span> so ⌘D opens a second connection there.
                 Persisted with the session; <span style="font-family: &quot;JetBrains Mono&quot;, monospace">--clear</span> goes back to a shell.
